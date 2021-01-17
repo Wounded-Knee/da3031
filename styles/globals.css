@@ -14,3 +14,21 @@ a {
 * {
   box-sizing: border-box;
 }
+
+.node.type_User .text {
+  font-size: 100px;
+}
+.node.type_Comment {
+  display: block;
+}
+.node.type_Comment .author {
+    width: 100px;
+    display: inline-block;
+    text-align: right;
+    margin-right: 1em;
+}
+.node.type_Comment .author .emoji {
+	margin-right: 0.5em;
+}
+
+@import url(./jsonview.css);
