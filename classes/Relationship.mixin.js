@@ -9,28 +9,65 @@ const RelationshipTypes = [
 	},
 	{
 		id: 1,
-		text: 'Author',
+		text: 'Authorship',
 		titles: [
 			{s: 'work', p: 'works'},
 			{s: 'author', p: 'authors'}
 		]
 	},
+	{
+		id: 2,
+		text: 'Path\'s step',
+		titles: [
+			{s: 'path', p: 'paths'},
+			{s: 'step', p: 'steps'}
+		]
+	},
+	{
+		id: 3,
+		text: 'Traveler\'s Path',
+		titles: [
+			{s: 'path', p: 'paths'},
+			{s: 'traveler', p: 'travelers'}
+		]
+	},
 ];
 
-const suppressRelationNodes = true;
+const relationshipGetterNames = [
+	'getChildren', 'getParents', 'getWorks', 'getAuthors', 'getPaths', 'getSteps', 'getTravelers'
+];
+
+// Preferences for getData() method
+const suppressRelationNodes = true; // Exclude all nodes which contain relationship information
+const expandRelationships = true; // Include related nodes as branches of main nodes (1 level deep)
 
 const Relationship = {
 	extend: (AnnuitCœptis) => {
 		class AnnuitCœptisII extends AnnuitCœptis {
 			getData() {
-				return suppressRelationNodes ?
-					super
-						.getData()
-						.filter(item => item.relationType_id === undefined)
-					: super.getData();
+				return super
+					.getData()
+					.map(
+						item => ( expandRelationships ? {
+							...item,
+							...relationshipGetterNames.reduce(
+								(propList, getterName) => ({
+									...propList,
+									[getterName]: item[getterName] ? item[getterName]() : undefined
+								}),
+								{}
+							)
+						} : item )
+					)
+					.filter(item => !suppressRelationNodes || item.relationType_id === undefined);
+			}
+
+			getRelationshipTypeById(id) {
+				return RelationshipTypes.find(rt => rt.id === id);
 			}
 
 			link(node1, node2, relationshipType) {
+				//console.log(`Relationship type #${relationshipType.id} created between ${node1.text} and ${node2.text}`);
 				this.createData({
 					relationType_id: relationshipType.id,
 					relatives: [node1.id, node2.id]
@@ -52,18 +89,22 @@ const Relationship = {
 					relationNodes.forEach(
 						relationNode => {
 							const relationshipTypeId = parseInt(relationNode.relationType_id);
-							const relationshipType = RelationshipTypes.find(rt => rt.id === relationshipTypeId);
-							const plural = relationshipType.titles[
-								relationNode.relatives.indexOf(superData.id) === 1 ? 0 : 1
-							].p;
-							const getterName = 'get' + plural.replace(/\b[a-zA-Z]/g, (match) => match.toUpperCase());
-							relatives[getterName] = () => {
-								const rels = relationNode.relatives;
-								const x = rels
-									.filter(nodeId => nodeId !== superData.id)
-									.map(this.getDataById.bind(this));
-								return x;
-							};
+							const relationshipType = this.getRelationshipTypeById(relationshipTypeId);
+							if (relationshipType) {
+								const plural = relationshipType.titles[
+									relationNode.relatives.indexOf(superData.id) === 1 ? 0 : 1
+								].p;
+								const getterName = 'get' + plural.replace(/\b[a-zA-Z]/g, (match) => match.toUpperCase());
+								relatives[getterName] = () => {
+									const rels = relationNode.relatives;
+									const x = rels
+										.filter(nodeId => nodeId !== superData.id)
+										.map(this.getDataById.bind(this));
+									return x;
+								};
+							} else {
+								console.log(`No relationship type #${relationshipTypeId} `);
+							}
 						}
 					);
 				}
@@ -80,7 +121,7 @@ const Relationship = {
 				if (rel !== undefined && superData) {
 					for (var relationshipTypeIds=Object.keys(rel), x=0; x<relationshipTypeIds.length; x++) {
 						const relationshipTypeId = parseInt(relationshipTypeIds[x]);
-						const relationshipType = RelationshipTypes.find(rt => rt.id === relationshipTypeId);
+						const relationshipType = this.getRelationshipTypeById(relationshipTypeId);
 						for (var y=0; y<rel[relationshipTypeId].length; y++) {
 							const targetNode = rel[relationshipTypeId][y];
 							if (targetNode) {

@@ -2,75 +2,21 @@ import test from './test.mixin';
 import NodeType from './NodeType.mixin';
 import Author from './Author.mixin';
 import Relationship from './Relationship.mixin';
-//const mixins = [test, NodeType, Author];
-const mixins = [Relationship];
-//const mixins = [];
+import Navigation from './Navigation.mixin';
+import User from './User.mixin';
+import Avatar from './Avatar.mixin';
+const mixins = [User, Avatar, Relationship, Navigation];
 
 const authorId = 100;
 
 class AnnuitCœptis {
 	constructor(mixins) {
-		this.data = [
-		];
+		this.data = [];
 		this.lastId = 0;
-		this.activeUser = null;
-		this.activeAvatar = null;
-		this.defaultDataType = {
-			id: 0
-		}
-
 		for (var x=0; x<mixins.length; x++) {
 			mixins[x].initialize ? mixins[x].initialize(this) : '';
 		}
 	}
-
-	getDefaultDataType() {
-		return this.data.find(item => item.id === 0);
-	}
-
-	getNode(id=1) {
-		return this.getDataById(id);
-	}
-
-	getDataById(id) {
-		const thisNode = this.data.find((node) => node.id === parseInt(id));
-		if (thisNode === undefined) throw new Error('Cannot find node id#' + id);
-		thisNode.getRelations = this.getRelationsOf.bind(this, thisNode);
-		return thisNode;
-	}
-
-	getRelationsOf(node) {
-	}
-
-	getRelationship(nodeRelation) {
-		return {
-			...nodeRelation,
-			author: getDataById(nodeRelation.author_id)
-		};
-	}
-
-	activateUser(user) {
-		console.log(user.text, ' activated');
-		return this.activeUser = user;
-	}
-
-	createUser(username, emoji) {
-		const user = this.createData(meta.nodeTypes.user, { text: username, emoji: emoji });
-		return {
-			...user,
-			activate: this.activateUser.bind(this, user)
-		};
-	}
-
-	createAvatar(username, emoji) {
-		return this.createData(meta.nodeTypes.user, { text: username, emoji: emoji });
-	}
-
-	createNode(text) {
-		return this.createData('node', { text: text });
-	}
-
-	// Used methods are below this line -------------
 
 	link(relationshipType, node1, node2) {
 		return this.createData({
@@ -118,7 +64,6 @@ class AnnuitCœptis {
 
 	_getNewID() {
 		const id = this.lastId++;
-		console.log('_getNewID()', id);
 		return id;
 	}
 };
@@ -134,7 +79,8 @@ const annuitCœptis = new AnnuitCœptisII(mixins);
 // Testing
 const
 	RT_CHILD_OF = 0,
-	RT_AUTHOR_OF = 1
+	RT_AUTHOR_OF = 1,
+	RT_TRAVELER = 2
 ;
 console.log('annuitCœptis ', annuitCœptis);
 
@@ -147,12 +93,14 @@ const usrJoelKramer = annuitCœptis.createData({
 		[ RT_AUTHOR_OF ]: [ SYSTEM ]
 	}
 });
+annuitCœptis.setUser(usrJoelKramer);
 const avaHeyoka = annuitCœptis.createData({
 	text: 'Heyoka',
 	rel: {
 		[ RT_AUTHOR_OF ]: [ usrJoelKramer ]
 	}
 });
+annuitCœptis.setAvatar(avaHeyoka);
 const avaDrew = annuitCœptis.createData({
 	text: 'Drew',
 	rel: {
@@ -165,13 +113,16 @@ const comHeyoka1 = annuitCœptis.createData({
 		[ RT_AUTHOR_OF ]: [ avaHeyoka ]
 	}
 });
-const comDrew2 = annuitCœptis.createData({
+const comDrew1 = annuitCœptis.createData({
 	text: 'Hi.',
 	rel: {
 		[ RT_AUTHOR_OF ]: [ avaDrew ],
 		[ RT_CHILD_OF ]: [ comHeyoka1 ]
 	}
 });
+
+annuitCœptis.navigate(undefined, comHeyoka1);
+annuitCœptis.navigate(comHeyoka1, comDrew1);
 
 // const meta = {
 // 	nodeTypes: {
