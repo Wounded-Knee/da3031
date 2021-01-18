@@ -8,10 +8,11 @@ export default function NodeView() {
 	const { nodeId } = router.query;
 
 	return (
-		<div>
-			<Node node={ annuitCœptis.getDataById(nodeId) } annuitCœptis={ annuitCœptis } />
+		<>
+			<ol className="nodes">
+				<Node node={ annuitCœptis.getDataById(nodeId) } annuitCœptis={ annuitCœptis } />
+			</ol>
  			<JsonView obj={ annuitCœptis.getData() } showLineNumbers />
-		</div>
+		</>
 	);
 };
-

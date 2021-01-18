@@ -12,7 +12,7 @@ export default function NodeList({nodes, heading=undefined, nodeDisplay=NodeDisp
 	return nodes.length ? (
 		<>
 			{ heading ? <h1>{ heading }</h1> : '' }
-			<ul>
+			<ul className="nodeList">
 				{ nodes.map( node =>
 					<li key={ 'node'+node.id }>
 				        { nodeDisplay(node) }

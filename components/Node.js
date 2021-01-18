@@ -33,7 +33,7 @@ export default function Node({ node, context, annuitCœptis }) {
 							context="parent"
 						/>
 					}
-					<span className={ `node type_${node.nodeType.name}` }>
+					<li className={ `node type_${node.nodeType.name}` }>
 						{ nodeAuthor && <AuthorName user={ nodeAuthor } /> }
 						<Link href={ `/node/${ node.id.toString() }` }>
 							<a>
@@ -47,7 +47,7 @@ export default function Node({ node, context, annuitCœptis }) {
 								excludedRelationTypes={ ['authors', 'parents'] }
 							/>
 						}
-					</span>
+					</li>
 				</>
 			);
 		break;
