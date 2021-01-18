@@ -62,8 +62,26 @@ const Relationship = {
 					.filter(item => !suppressRelationNodes || item.relationType_id === undefined);
 			}
 
+			getRelationshipTypes() {
+				return RelationshipTypes.map(rt => this.getRelationshipTypeById(rt.id));
+			}
+
 			getRelationshipTypeById(id) {
-				return RelationshipTypes.find(rt => rt.id === id);
+				const rt = RelationshipTypes.find(rt => rt.id === id);
+				return {
+					...rt,
+					titles: [
+						...rt.titles.map(
+							title => ({
+								...title,
+								g: 'get' + title.p.replace(
+									/\b[a-zA-Z]/g,
+									(match) => match.toUpperCase()
+								)
+							})
+						)
+					]
+				};
 			}
 
 			link(node1, node2, relationshipType) {
@@ -91,10 +109,10 @@ const Relationship = {
 							const relationshipTypeId = parseInt(relationNode.relationType_id);
 							const relationshipType = this.getRelationshipTypeById(relationshipTypeId);
 							if (relationshipType) {
-								const plural = relationshipType.titles[
+								const getterName = relationshipType.titles[
 									relationNode.relatives.indexOf(superData.id) === 1 ? 0 : 1
-								].p;
-								const getterName = 'get' + plural.replace(/\b[a-zA-Z]/g, (match) => match.toUpperCase());
+								].g;
+								//const getterName = 'get' + plural.replace(/\b[a-zA-Z]/g, (match) => match.toUpperCase());
 								relatives[getterName] = () => {
 									const rels = relationNode.relatives;
 									const x = rels
@@ -103,7 +121,7 @@ const Relationship = {
 									return x;
 								};
 							} else {
-								console.log(`No relationship type #${relationshipTypeId} `);
+								console.warn(`No relationship type #${relationshipTypeId} `);
 							}
 						}
 					);

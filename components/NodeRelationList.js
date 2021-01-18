@@ -4,26 +4,31 @@ import Link from 'next/link'
 const NodeDisplay = (node) => {
 	return (
 		<>
-			<span className="relationship">{ node.relationship.author.text }</span>
-			<Link href={ `/node/${ node.id.toString() }` }>
+			<Link href={ `/node/${ node.id }` }>
 				<a>{ node.text }</a>
 			</Link>
 		</>
 	);
 };
 
-export default function NodeRelationList({ rootNode, excludedRelationTypes }) {
-	const nodeRelations = rootNode.getRelations();
-	return Object.keys(nodeRelations)
-		.filter(
-			(nodeRelationType) => (excludedRelationTypes || []).indexOf(nodeRelationType) === -1
-		)
-		.map(
-			(nodeRelationType) => <NodeList
-				key={ nodeRelationType }
-				heading={ nodeRelationType } 
-				nodes={ nodeRelations[nodeRelationType] }
-				nodeDisplay={ NodeDisplay }
-			/>
-		);
+export default function NodeRelationList({ rootNode, annuitCœptis, excludedRelationTypes }) {
+	if (annuitCœptis.getRelationshipTypes) {
+		return annuitCœptis
+			.getRelationshipTypes()
+			.map(
+				(nodeRelationType) => <>
+					{ nodeRelationType.titles.map(
+						title => rootNode[title.g] ? <NodeList
+							key={ nodeRelationType.id + title.plural }
+							heading={ title.p } 
+							nodes={ rootNode[title.g]() }
+							nodeDisplay={ NodeDisplay }
+						/> : null
+					) }
+				</>
+			);
+	} else {
+		console.log('getRelationshipTypes undefined @ ', annuitCœptis);
+		return null;
+	}
 };

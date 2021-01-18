@@ -2,9 +2,17 @@ import NodeRelationList from './NodeRelationList';
 import AuthorName from './AuthorName';
 import Link from 'next/link'
 
-export default function Node({ node, context }) {
-	const nodeRelations = node.getRelations();
+export default function Node({ node, context, annuitCœptis }) {
 	console.log(node);
+
+	if (!node) {
+		console.log('Bad node? ', node);
+		return null;
+	}
+
+	node.nodeType = { id: 0 };
+	const nodeParent = node.getParents ? node.getParents()[0] : undefined;
+	const nodeAuthor = node.getAuthors ? node.getAuthors()[0] : undefined;
 
 	switch(node.nodeType.id) {
 		case 2: // User
@@ -19,21 +27,25 @@ export default function Node({ node, context }) {
 		default:
 			return (
 				<>
-					{ nodeRelations.parents.length > 0 && 
+					{ nodeParent !== undefined && 
 						<Node
-							node={ nodeRelations.parents[0] }
+							node={ nodeParent }
 							context="parent"
 						/>
 					}
 					<span className={ `node type_${node.nodeType.name}` }>
-						<AuthorName user={ nodeRelations.authors[0] } />
+						{ nodeAuthor && <AuthorName user={ nodeAuthor } /> }
 						<Link href={ `/node/${ node.id.toString() }` }>
 							<a>
 								<span className="text">{ node.text }</span>
 							</a>
 						</Link>
 						{ context !== 'parent' &&
-							<NodeRelationList rootNode={ node } excludedRelationTypes={ ['authors', 'parents'] } />
+							<NodeRelationList
+								annuitCœptis={ annuitCœptis }
+								rootNode={ node }
+								excludedRelationTypes={ ['authors', 'parents'] }
+							/>
 						}
 					</span>
 				</>

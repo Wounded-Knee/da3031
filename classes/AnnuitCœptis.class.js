@@ -36,9 +36,15 @@ class AnnuitCœptis {
 	}
 
 	getDataById(nodeId) {
-		const data = this.data.find(item => item.id === nodeId);
-		if (data === undefined) {
+		const intNodeId = parseInt(nodeId);
+		if (isNaN(intNodeId)) {
 			console.log(`AnnuitCœptis: Node #${nodeId} not found`);
+			return undefined;
+		}
+		const data = this.data.find(item => item.id === intNodeId);
+		if (data === undefined) {
+			console.log(`AnnuitCœptis: Node #${intNodeId} not found`);
+			return undefined;
 		}
 		return this.hydrateData(data);
 	}
