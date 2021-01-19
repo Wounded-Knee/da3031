@@ -32,7 +32,7 @@ a {
 }
 
 .node .react-tabs {
-  margin-top: 2em;
+  margin: 4em 0;
 }
 
 @import url(./jsonview.css);

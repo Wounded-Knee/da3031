@@ -3,54 +3,40 @@ import Link from 'next/link'
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 
 const NodeDisplay = (node) => {
-	return (
-		<>
-			<Link href={ `/node/${ node.id }` }>
-				<a>{ node.text }</a>
-			</Link>
-		</>
-	);
+	return node ? (
+		<Link href={ `/node/${ node.id }` }>
+			<a>{ node.text }</a>
+		</Link>
+	) : null;
 };
 
 export default function NodeRelationList({ rootNode, annuitCœptis, excludedRelationTypes }) {
+	const tabList = annuitCœptis.getRelationshipTypes().map(
+		(relationshipType) => relationshipType.titles.reduce(
+			(titleAcc, title) => ({
+				...titleAcc,
+				[title.p]: rootNode[title.g]()
+			}), {}
+		)
+	).reduce( (acc, val) => ({ ...acc, ...val }) );
+
+	console.log('tablist', tabList);
+
 	if (annuitCœptis.getRelationshipTypes) {
 		return (
 			<Tabs>
 				<TabList>
-					{ annuitCœptis
-						.getRelationshipTypes()
-						.map(
-							(nodeRelationType) => <>
-								{ nodeRelationType.titles.map(
-									title => (
-										rootNode[title.g] && excludedRelationTypes.indexOf(title.p) === -1 ? (
-											<Tab>{ title.p }</Tab>
-										) : null
-									)
-								) }
-							</>
-						)
-					}
+					{ Object.keys(tabList).map(tab => <Tab>{ tab }</Tab>) }
 				</TabList>
 
-				{ annuitCœptis
-					.getRelationshipTypes()
-					.map(
-						(nodeRelationType) => <>
-							{ nodeRelationType.titles.map(
-								title => rootNode[title.g] && excludedRelationTypes.indexOf(title.p) === -1 ? (
-									<TabPanel>
-										<NodeList
-											key={ nodeRelationType.id + title.plural }
-											nodes={ rootNode[title.g]() }
-											nodeDisplay={ NodeDisplay }
-										/>
-									</TabPanel>
-								) : null
-							) }
-						</>
-					)
-				}
+				{ Object.keys(tabList).map(tab => (
+					<TabPanel>
+						<NodeList
+							nodes={ tabList[tab] }
+							nodeDisplay={ NodeDisplay }
+						/>
+					</TabPanel>
+				)) }
 			</Tabs>
 		);
 	} else {

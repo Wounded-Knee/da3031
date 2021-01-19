@@ -39,7 +39,7 @@ const relationshipGetterNames = [
 
 // Preferences for getData() method
 const suppressRelationNodes = true; // Exclude all nodes which contain relationship information
-const expandRelationships = true; // Include related nodes as branches of main nodes (1 level deep)
+const expandRelationships = false; // Include related nodes as branches of main nodes (1 level deep)
 
 const Relationship = {
 	extend: (AnnuitCœptis) => {
@@ -94,42 +94,36 @@ const Relationship = {
 
 			hydrateData(data) {
 				const superData = super.hydrateData(data);
-				const relatives = {};
 
-				if (superData !== undefined) {
-					const relationNodes = this.data.filter(
-						node => (
-							node.relationType_id !== undefined &&
-							node.relatives.indexOf(superData.id) !== -1
-						)
-					);
-					
-					relationNodes.forEach(
-						relationNode => {
-							const relationshipTypeId = parseInt(relationNode.relationType_id);
-							const relationshipType = this.getRelationshipTypeById(relationshipTypeId);
-							if (relationshipType) {
-								const getterName = relationshipType.titles[
-									relationNode.relatives.indexOf(superData.id) === 1 ? 0 : 1
-								].g;
-								//const getterName = 'get' + plural.replace(/\b[a-zA-Z]/g, (match) => match.toUpperCase());
-								relatives[getterName] = () => {
-									const rels = relationNode.relatives;
-									const x = rels
-										.filter(nodeId => nodeId !== superData.id)
-										.map(this.getDataById.bind(this));
-									return x;
-								};
-							} else {
-								console.warn(`No relationship type #${relationshipTypeId} `);
-							}
-						}
-					);
-				}
+				console.log(data.text);
 
 				return {
 					...superData,
-					...relatives
+					...this.getRelationshipTypes().map(
+						(relationshipType) => relationshipType.titles.reduce(
+							(titleAcc, title) => ({
+								...titleAcc,
+								[title.g]: () => this.data.filter(
+									(node, idx) => {
+										return (
+											node.relationType_id !== undefined &&
+											node.relatives.indexOf(superData.id) === (idx === 0 ? 1 : 0)
+										);
+									}
+								).map(
+									relationshipNode => {
+										const x = relationshipNode.relatives.indexOf(superData.id);
+										const relatedNode = this.getDataById(
+											relationshipNode.relatives[x === 0 ? 1 : 0]
+										);
+
+										console.log(`${relationshipType.text}: ${superData.text} (#${superData.id}) => ${relatedNode.text} (#${relatedNode.id}`);
+										return relatedNode;
+									}
+								)
+							}), {}
+						)
+					).reduce( (acc, val) => ({ ...acc, ...val }) )
 				};
 			}
 

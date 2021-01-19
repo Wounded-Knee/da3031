@@ -1,11 +1,11 @@
 import Link from 'next/link'
 
 const NodeDisplay = (node) => {
-	return (
+	return node ? (
 		<Link href={ `/node/${ node.id.toString() }` }>
 			<a>{ node.text }</a>
 		</Link>
-	);
+	) : null;
 };
 
 export default function NodeList({nodes, heading=undefined, nodeDisplay=NodeDisplay}) {

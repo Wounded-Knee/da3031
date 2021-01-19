@@ -3,8 +3,6 @@ import AuthorName from './AuthorName';
 import Link from 'next/link'
 
 export default function Node({ node, context, annuitCœptis }) {
-	console.log(node);
-
 	if (!node) {
 		console.log('Bad node? ', node);
 		return null;

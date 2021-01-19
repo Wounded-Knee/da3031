@@ -12,6 +12,7 @@ export default function NodeView() {
 			<ol className="nodes">
 				<Node node={ annuitCœptis.getDataById(nodeId) } annuitCœptis={ annuitCœptis } />
 			</ol>
+
  			<JsonView obj={ annuitCœptis.getData() } showLineNumbers />
 		</>
 	);

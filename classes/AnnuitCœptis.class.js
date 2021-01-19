@@ -129,6 +129,8 @@ const comDrew1 = annuitCœptis.createData({
 
 annuitCœptis.navigate(undefined, comHeyoka1);
 annuitCœptis.navigate(comHeyoka1, comDrew1);
+annuitCœptis.navigate(comHeyoka1, comDrew1);
+annuitCœptis.navigate(comHeyoka1, comDrew1);
 
 // const meta = {
 // 	nodeTypes: {
