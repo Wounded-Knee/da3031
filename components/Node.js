@@ -1,8 +1,10 @@
 import NodeRelationList from './NodeRelationList';
 import AuthorName from './AuthorName';
-import Link from 'next/link'
+import Link from 'next/link';
+import annuitCœptis from '../classes/AnnuitCœptis.class';
+import NodeSelector from './NodeSelector';
 
-export default function Node({ node, context, annuitCœptis }) {
+export default function Node({ node, context }) {
 	if (!node) {
 		console.log('Bad node? ', node);
 		return null;
@@ -25,7 +27,7 @@ export default function Node({ node, context, annuitCœptis }) {
 		default:
 			return (
 				<>
-					{ nodeParent !== undefined && 
+					{ nodeParent !== undefined &&
 						<Node
 							node={ nodeParent }
 							context="parent"
@@ -38,13 +40,18 @@ export default function Node({ node, context, annuitCœptis }) {
 								<span className="text">{ node.text }</span>
 							</a>
 						</Link>
-						{ context !== 'parent' &&
-							<NodeRelationList
-								annuitCœptis={ annuitCœptis }
-								rootNode={ node }
-								excludedRelationTypes={ ['authors', 'parents'] }
+
+						{ context !== 'parent' && <>
+							<NodeSelector
+								nodeList={ node.getChildren() }
 							/>
-						}
+							<NodeRelationList
+								rootNode={ node }
+								blacklist={
+									annuitCœptis.getRelationshipTypeById(1).titles[1]
+								}
+							/>
+						</> }
 					</li>
 				</>
 			);
