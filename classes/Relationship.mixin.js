@@ -84,11 +84,14 @@ const Relationship = {
 				};
 			}
 
-			link(node1, node2, relationshipType) {
+			link(relationshipType, relatives) {
 				//console.log(`Relationship type #${relationshipType.id} created between ${node1.text} and ${node2.text}`);
+				if (!relationshipType) {
+					console.log(`link() error: No relationship type`, relationshipType);
+				}
 				this.createData({
 					relationType_id: relationshipType.id,
-					relatives: [node1.id, node2.id]
+					relatives: relatives.map( relative => relative.id )
 				});
 			}
 
@@ -101,23 +104,25 @@ const Relationship = {
 					...superData,
 					...this.getRelationshipTypes().map(
 						(relationshipType) => relationshipType.titles.reduce(
-							(titleAcc, title) => ({
-								...titleAcc,
+							(getters, title, titleIndex) => ({
+								...getters,
 								[title.g]: () => this.data.filter(
-									(node, idx) => {
+									(node) => {
+										if (!node.relatives) return false;
+										const relativeTitleIndex = node.relatives.indexOf(superData.id);
 										return (
-											node.relationType_id !== undefined &&
-											node.relatives.indexOf(superData.id) === (idx === 0 ? 1 : 0)
+											node.relationType_id === relationshipType.id &&
+											relativeTitleIndex !== -1 &&
+											relativeTitleIndex !== titleIndex
 										);
 									}
 								).map(
 									relationshipNode => {
-										const x = relationshipNode.relatives.indexOf(superData.id);
 										const relatedNode = this.getDataById(
-											relationshipNode.relatives[x === 0 ? 1 : 0]
+											relationshipNode.relatives[titleIndex]
 										);
 
-										console.log(`${relationshipType.text}: ${superData.text} (#${superData.id}) => ${relatedNode.text} (#${relatedNode.id}`);
+										console.log(`${relationshipType.text}: ${superData.text} (#${superData.id}) => ${relatedNode.text} (#${relatedNode.id})`);
 										return relatedNode;
 									}
 								)
@@ -130,6 +135,7 @@ const Relationship = {
 			conceiveData(data) {
 				const superData = super.conceiveData(data);
 				const { rel, ...newData } = superData;
+
 				if (rel !== undefined && superData) {
 					for (var relationshipTypeIds=Object.keys(rel), x=0; x<relationshipTypeIds.length; x++) {
 						const relationshipTypeId = parseInt(relationshipTypeIds[x]);
@@ -138,7 +144,7 @@ const Relationship = {
 							const targetNode = rel[relationshipTypeId][y];
 							if (targetNode) {
 								console.log(`${superData.text}(#${superData.id}) is now ${relationshipType.titles[0].s} of ${targetNode.text}(#${targetNode.id})`);
-								this.link(superData, targetNode, relationshipType);
+								this.link(relationshipType, [ superData, targetNode ]);
 							} else {
 								console.error(`No target node to link @`, rel[relationshipTypeId]);
 							}

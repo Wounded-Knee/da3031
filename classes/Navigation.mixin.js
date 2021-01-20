@@ -31,7 +31,7 @@ const Navigation = {
 						}
 					});
 				}
-				this.link(this.navCurrentPath, destination, this.getRelationshipTypeById(RT_PATH_STEP))
+				this.link(this.getRelationshipTypeById(RT_PATH_STEP), [ this.navCurrentPath, destination ])
 			}
 		};
 		return AnnuitCœptisII;

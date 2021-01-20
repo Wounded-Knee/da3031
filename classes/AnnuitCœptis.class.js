@@ -18,10 +18,10 @@ class AnnuitCœptis {
 		}
 	}
 
-	link(relationshipType, node1, node2) {
+	link(relationshipType, relatives) {
 		return this.createData({
 			relationshipType_id: relationshipType.id,
-			relatives: [node1.id, node2.id]
+			relatives: relatives.map( relative => relative.id )
 		});
 	}
 
