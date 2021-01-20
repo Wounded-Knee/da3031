@@ -18,7 +18,19 @@ export default function NodeRelationList({ rootNode, annuitCœptis, excludedRela
 				[title.p]: rootNode[title.g]()
 			}), {}
 		)
-	).reduce( (acc, val) => ({ ...acc, ...val }) );
+	).reduce(
+		(acc, val) => {
+			const tabs = { ...acc };
+			Object.keys(val).forEach(
+				tabKey => {
+					if (val[tabKey].length > 0) {
+						tabs[tabKey] = val[tabKey];
+					}
+				}
+			)
+			return tabs;
+		}, {}
+	);
 
 	console.log('tablist', tabList);
 

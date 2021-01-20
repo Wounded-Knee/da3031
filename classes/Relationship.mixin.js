@@ -98,8 +98,6 @@ const Relationship = {
 			hydrateData(data) {
 				const superData = super.hydrateData(data);
 
-				console.log(data.text);
-
 				return {
 					...superData,
 					...this.getRelationshipTypes().map(
