@@ -38,8 +38,8 @@ const relationshipGetterNames = [
 ];
 
 // Preferences for getData() method
-const suppressRelationNodes = true; // Exclude all nodes which contain relationship information
-const expandRelationships = false; // Include related nodes as branches of main nodes (1 level deep)
+const suppressRelationNodes = false; // Exclude all nodes which contain relationship information
+const expandRelationships = true; // Include related nodes as branches of main nodes (1 level deep)
 
 const Relationship = {
 	extend: (AnnuitCœptis) => {

@@ -16,10 +16,8 @@ class NodeView extends React.Component {
 	}
 
 	render() {
-		const { router } = this.props;
-		const { nodeId } = router.query;
+		const { nodeId } = this.props.router.query;
 
-		console.log('Router ', router);
 		return (
 			<>
 				<ol className="nodes">

@@ -5,6 +5,12 @@ import { annuitCœptis } from '../classes/AnnuitCœptis.class';
 import NodeSelector from './NodeSelector';
 import { useRouter } from 'next/router';
 
+const
+	RT_CHILD_OF = 0,
+	RT_AUTHOR_OF = 1,
+	RT_TRAVELER = 2
+;
+
 export default function Node({ node, context }) {
 	if (!node) {
 		console.log('Bad node? ', node);
@@ -47,6 +53,15 @@ export default function Node({ node, context }) {
 								nodeOptions={ node.getChildren() }
 								selectOnCreate
 								onSelect={ chosenNode => annuitCœptis.navigate(node, chosenNode) }
+								createNode={
+									(text) => annuitCœptis.createData({
+										text,
+										rel: {
+											[ RT_AUTHOR_OF ]: [ annuitCœptis.getAvatar() ],
+											[ RT_CHILD_OF ]: [ node ]
+										}
+									})
+								}
 							/>
 							<NodeRelationList
 								rootNode={ node }

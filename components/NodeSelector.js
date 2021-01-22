@@ -1,4 +1,5 @@
 import React from 'react';
+import { annuitCœptis } from '../classes/AnnuitCœptis.class';
 import Creatable, { makeCreatableSelect } from 'react-select/creatable';
 
 export default class NodeSelector extends React.Component {
@@ -21,11 +22,8 @@ export default class NodeSelector extends React.Component {
 	};
 
 	onCreateOption = (txt) => {
-		const { selectOnCreate = false } = this.props;
-		const newOption = this.nodeToOption({
-			thisIs: 'a node',
-			text: txt
-		});
+		const { selectOnCreate = false, createNode } = this.props;
+		const newNode = createNode(txt);
 
 		this.setState({ isLoading: true });
 		console.group('Option creating: ', txt);
@@ -37,11 +35,11 @@ export default class NodeSelector extends React.Component {
 				isLoading: false,
 				options: [
 					...this.state.options,
-					newOption
+					newNode
 				],
-				selectedOption: newOption
+				selectedOption: newNode
 			});
-			if (selectOnCreate) this.handleChange(newOption);
+			if (selectOnCreate) this.handleChange( this.nodeToOption(newNode) );
 		}, 250);
 	};
 
@@ -52,13 +50,16 @@ export default class NodeSelector extends React.Component {
 
 	render() {
 		const { selectedOption, options } = this.state;
+		const newOptions = options.map( this.nodeToOption );
+
+		console.log('Rendering NodeSelector with options ', newOptions);
 
 		return (
 			<Creatable
 				value={ this.nodeToOption(selectedOption) }
 				onChange={ this.handleChange }
 				onCreateOption={ this.onCreateOption }
-				options={ options.map( this.nodeToOption ) }
+				options={ newOptions }
 				isSearchable
 				autoFocus
 			/>
