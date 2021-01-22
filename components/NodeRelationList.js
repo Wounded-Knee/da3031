@@ -1,6 +1,6 @@
 import NodeList from './NodeList';
 import Link from 'next/link'
-import annuitCœptis from '../classes/AnnuitCœptis.class';
+import { annuitCœptis } from '../classes/AnnuitCœptis.class';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 
 const NodeDisplay = (node) => {

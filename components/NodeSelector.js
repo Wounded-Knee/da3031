@@ -1,54 +1,67 @@
-import Downshift from 'downshift';
+import React from 'react';
+import Creatable, { makeCreatableSelect } from 'react-select/creatable';
 
-export default function Node({ nodeList }) {
-	return <Downshift
-		    onChange={selection =>
-		      alert(selection ? `You selected ${selection.text}` : 'Selection Cleared')
-		    }
-		    itemToString={item => (item ? item.text : '')}
-		  >
-		    {({
-		      getInputProps,
-		      getItemProps,
-		      getLabelProps,
-		      getMenuProps,
-		      isOpen,
-		      inputValue,
-		      highlightedIndex,
-		      selectedItem,
-		      getRootProps,
-		    }) => (
-		      <div>
-		        <label {...getLabelProps()}>...</label>
-		        <div
-		          style={{display: 'inline-block'}}
-		          {...getRootProps({}, {suppressRefError: true})}
-		        >
-		          <input {...getInputProps()} />
-		        </div>
-		        <ul {...getMenuProps()}>
-		          {isOpen
-		            ? nodeList
-		                .filter(item => !inputValue || item.text.includes(inputValue))
-		                .map((item, index) => (
-		                  <li
-		                    {...getItemProps({
-		                      key: item.text,
-		                      index,
-		                      item,
-		                      style: {
-		                        backgroundColor:
-		                          highlightedIndex === index ? 'lightgray' : 'white',
-		                        fontWeight: selectedItem === item ? 'bold' : 'normal',
-		                      },
-		                    })}
-		                  >
-		                    {item.text}
-		                  </li>
-		                ))
-		            : null}
-		        </ul>
-		      </div>
-		    )}
-		  </Downshift>
+export default class NodeSelector extends React.Component {
+	state = {
+		selectedOption: null,
+	};
+
+	constructor(props){
+		super(props)
+		this.state = {
+			options: props.nodeOptions
+		};
+	}
+
+	handleChange = selectedOption => {
+		const { onSelect = () => {} } = this.props;
+		const { value: node } = selectedOption;
+		this.setState({ selectedOption: node });
+		onSelect(node);
+	};
+
+	onCreateOption = (txt) => {
+		const { selectOnCreate = false } = this.props;
+		const newOption = this.nodeToOption({
+			thisIs: 'a node',
+			text: txt
+		});
+
+		this.setState({ isLoading: true });
+		console.group('Option creating: ', txt);
+		console.log('Wait a moment...');
+    	setTimeout(() => {
+			console.log('Creation complete');
+			console.groupEnd();
+      		this.setState({
+				isLoading: false,
+				options: [
+					...this.state.options,
+					newOption
+				],
+				selectedOption: newOption
+			});
+			if (selectOnCreate) this.handleChange(newOption);
+		}, 250);
+	};
+
+	nodeToOption = (node) => ( node ? {
+		value: node,
+		label: node.text
+	} : undefined);
+
+	render() {
+		const { selectedOption, options } = this.state;
+
+		return (
+			<Creatable
+				value={ this.nodeToOption(selectedOption) }
+				onChange={ this.handleChange }
+				onCreateOption={ this.onCreateOption }
+				options={ options.map( this.nodeToOption ) }
+				isSearchable
+				autoFocus
+			/>
+		);
+	};
 };

@@ -1,8 +1,9 @@
 import NodeRelationList from './NodeRelationList';
 import AuthorName from './AuthorName';
 import Link from 'next/link';
-import annuitCœptis from '../classes/AnnuitCœptis.class';
+import { annuitCœptis } from '../classes/AnnuitCœptis.class';
 import NodeSelector from './NodeSelector';
+import { useRouter } from 'next/router';
 
 export default function Node({ node, context }) {
 	if (!node) {
@@ -43,7 +44,9 @@ export default function Node({ node, context }) {
 
 						{ context !== 'parent' && <>
 							<NodeSelector
-								nodeList={ node.getChildren() }
+								nodeOptions={ node.getChildren() }
+								selectOnCreate
+								onSelect={ chosenNode => annuitCœptis.navigate(node, chosenNode) }
 							/>
 							<NodeRelationList
 								rootNode={ node }

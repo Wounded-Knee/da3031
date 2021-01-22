@@ -130,45 +130,9 @@ const comDrew1 = annuitCœptis.createData({
 annuitCœptis.navigate(undefined, comHeyoka1);
 annuitCœptis.navigate(comHeyoka1, comDrew1);
 
+const Component = null;
 
-// const meta = {
-// 	nodeTypes: {
-// 		relation: annuitCœptis.createData({ text: 'Relation' }),
-// 		user: annuitCœptis.createData({ text: 'User' }),
-// 		avatar: annuitCœptis.createData({ text: 'Avatar' }),
-// 		comment: annuitCœptis.createData({ text: 'Comment' })
-// 	}
-// };
-
-/*,
-	relation: {
-		lineage: annuitCœptis.createData('relation', {
-			name: "Lineage",
-			titles: [
-				{s: 'parent', p: 'parents'},
-				{s: 'child', p: 'children'}
-			]
-		}),
-		lineage: annuitCœptis.createData('relation', {
-			name: "Confederation",
-			titles: [
-				{s: 'federation', p: 'federations'},
-				{s: 'state', p: 'states'}
-			]
-		}),
-		lineage: annuitCœptis.createData('relation', {
-			name: "Authorship",
-			titles: [
-				{s: 'author', p: 'authors'},
-				{s: 'work', p: 'works'}
-			]
-		}),
-	}
+export {
+	annuitCœptis,
+	Component
 };
-
-const usrHeyoka = annuitCœptis.createUser('Heyoka').activate();
-const avaBillCarson = annuitCœptis.createAvatar('Bill Carson');
-const txtHelloWorld = annuitCœptis.createNode('Hello, world!');
-*/
-
-export default annuitCœptis;

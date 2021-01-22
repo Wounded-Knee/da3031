@@ -11,6 +11,7 @@ const Navigation = {
 		class AnnuitCœptisII extends AnnuitCœptis {
 			constructor(mixins) {
 				const rv = super(mixins);
+				this.navigationByNodeCallback = () => {};
 				this.navCurrentPath = undefined;
 				this.navRtPath = this.createData({
 					text: 'Path',
@@ -19,6 +20,10 @@ const Navigation = {
 					text: 'Path Step',
 				});
 				return rv;
+			}
+
+			setNavigationByNodeCallback(cb) {
+				this.navigationByNodeCallback = cb;
 			}
 
 			navigate(origin, destination) {
@@ -31,7 +36,8 @@ const Navigation = {
 						}
 					});
 				}
-				this.link(this.getRelationshipTypeById(RT_PATH_STEP), [ this.navCurrentPath, destination ])
+				this.link(this.getRelationshipTypeById(RT_PATH_STEP), [ this.navCurrentPath, destination ]);
+				this.navigationByNodeCallback(destination);
 			}
 		};
 		return AnnuitCœptisII;

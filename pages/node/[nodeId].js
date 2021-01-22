@@ -1,19 +1,35 @@
-import { useRouter } from 'next/router';
+import React from 'react';
+import { withRouter } from 'next/router';
 import Node from '../../components/Node';
-import annuitCœptis from '../../classes/AnnuitCœptis.class';
+import { annuitCœptis, Component } from '../../classes/AnnuitCœptis.class';
 import { JsonView } from 'json-view-for-react';
 
-export default function NodeView() {
-	const router = useRouter();
-	const { nodeId } = router.query;
+class NodeView extends React.Component {
+	constructor() {
+		super();
+		annuitCœptis.setNavigationByNodeCallback( this.navigateToNode.bind(this) );
+	}
 
-	return (
-		<>
-			<ol className="nodes">
-				<Node node={ annuitCœptis.getDataById(nodeId) } />
-			</ol>
+	navigateToNode(node) {
+		const { router } = this.props;
+		router.push(`/node/${node.id}`);
+	}
 
- 			<JsonView obj={ annuitCœptis.getData() } showLineNumbers />
-		</>
-	);
+	render() {
+		const { router } = this.props;
+		const { nodeId } = router.query;
+
+		console.log('Router ', router);
+		return (
+			<>
+				<ol className="nodes">
+					<Node node={ annuitCœptis.getDataById(nodeId) } />
+				</ol>
+
+	 			<JsonView obj={ annuitCœptis.getData() } showLineNumbers />
+			</>
+		);
+	}
 };
+
+export default withRouter(NodeView);
