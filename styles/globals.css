@@ -18,21 +18,34 @@ a {
 .node.type_User .text {
   font-size: 100px;
 }
-.node.type_undefined {
+.node.type_Comment {
   display: block;
 }
-.node.type_undefined .author {
+.node.type_Comment .author {
     width: 100px;
     display: inline-block;
     text-align: right;
     margin-right: 1em;
+    color: #aaa;
 }
-.node.type_undefined .author .emoji {
+.node.type_Comment .author .emoji {
 	margin-right: 0.5em;
 }
 
 .node .react-tabs {
   margin: 4em 0;
+}
+
+header {
+  font-size: 2.5em;
+}
+
+header span.active {
+  font-weight: bold;
+}
+
+header span {
+  margin-right: 2em;
 }
 
 @import url(./jsonview.css);

@@ -9,6 +9,7 @@ const NodeDisplay = (node) => {
 };
 
 export default function NodeList({nodes, heading=undefined, nodeDisplay=NodeDisplay}) {
+	console.log('NodeList ', nodes);
 	return nodes.length ? (
 		<>
 			{ heading ? <h1>{ heading }</h1> : '' }

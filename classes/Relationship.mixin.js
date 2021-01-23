@@ -2,6 +2,7 @@ const RelationshipTypes = [
 	{
 		id: 0,
 		text: 'Lineage',
+		constant: 'CHILD_OF',
 		titles: [
 			{s: 'child', p: 'children'},
 			{s: 'parent', p: 'parents'}
@@ -10,6 +11,7 @@ const RelationshipTypes = [
 	{
 		id: 1,
 		text: 'Authorship',
+		constant: 'WORK_OF',
 		titles: [
 			{s: 'work', p: 'works'},
 			{s: 'author', p: 'authors'}
@@ -38,7 +40,7 @@ const relationshipGetterNames = [
 ];
 
 // Preferences for getData() method
-const suppressRelationNodes = false; // Exclude all nodes which contain relationship information
+const suppressRelationNodes = true; // Exclude all nodes which contain relationship information
 const expandRelationships = true; // Include related nodes as branches of main nodes (1 level deep)
 
 const Relationship = {
@@ -88,8 +90,17 @@ const Relationship = {
 				//console.log(`Relationship type #${relationshipType.id} created between ${node1.text} and ${node2.text}`);
 				if (!relationshipType) {
 					console.log(`link() error: No relationship type`, relationshipType);
+					return new Promise(
+						(res, rej) => rej()
+					);
 				}
-				this.createData({
+				if (relatives.filter( r => r.id === null ).length > 0) {
+					console.error(`link() error: Cannot create relationship because one of these nodes has no id: `, relatives);
+					return new Promise(
+						(res, rej) => rej()
+					);
+				}
+				return this.createData({
 					relationType_id: relationshipType.id,
 					relatives: relatives.map( relative => relative.id )
 				});
@@ -111,7 +122,8 @@ const Relationship = {
 										return (
 											node.relationType_id === relationshipType.id &&
 											relativeTitleIndex !== -1 &&
-											relativeTitleIndex !== titleIndex
+											relativeTitleIndex !== titleIndex &&
+											node.relatives[titleIndex] !== null
 										);
 									}
 								).map(
@@ -120,8 +132,13 @@ const Relationship = {
 											relationshipNode.relatives[titleIndex]
 										);
 
-										console.log(`${relationshipType.text}: ${superData.text} (#${superData.id}) => ${relatedNode.text} (#${relatedNode.id})`);
-										return relatedNode;
+										if (!relatedNode) {
+											console.error(`hydrateData(${relationshipType.text}): Cannot find ${node.text}'s' ${title} with a bad ID#${relationshipNode.relatives[titleIndex]}`);
+											return {};
+										} else {
+											console.log(`hydrateData(${relationshipType.text}): ${superData.text} (#${superData.id}) => ${relatedNode.text} (#${relatedNode.id})`);
+											return relatedNode;
+										}
 									}
 								)
 							}), {}
@@ -130,28 +147,28 @@ const Relationship = {
 				};
 			}
 
-			conceiveData(data) {
-				const superData = super.conceiveData(data);
-				const { rel, ...newData } = superData;
-
-				if (rel !== undefined && superData) {
-					for (var relationshipTypeIds=Object.keys(rel), x=0; x<relationshipTypeIds.length; x++) {
-						const relationshipTypeId = parseInt(relationshipTypeIds[x]);
-						const relationshipType = this.getRelationshipTypeById(relationshipTypeId);
-						for (var y=0; y<rel[relationshipTypeId].length; y++) {
-							const targetNode = rel[relationshipTypeId][y];
-							if (targetNode) {
-								console.log(`${superData.text}(#${superData.id}) is now ${relationshipType.titles[0].s} of ${targetNode.text}(#${targetNode.id})`);
-								this.link(relationshipType, [ superData, targetNode ]);
-							} else {
-								console.error(`No target node to link @`, rel[relationshipTypeId]);
+			createData(data) {
+				const { rel, ...newData } = data;
+				return super.createData(newData).then(
+					(parentNode) => {
+						if (rel !== undefined && parentNode) {
+							for (var relationshipTypeIds=Object.keys(rel), x=0; x<relationshipTypeIds.length; x++) {
+								const relationshipTypeId = parseInt(relationshipTypeIds[x]);
+								const relationshipType = this.getRelationshipTypeById(relationshipTypeId);
+								for (var y=0; y<rel[relationshipTypeId].length; y++) {
+									const targetNode = rel[relationshipTypeId][y];
+									if (targetNode) {
+										console.log(`${parentNode.text}(#${parentNode.id}) is now ${relationshipType.titles[0].s} of ${targetNode.text}(#${targetNode.id})`);
+										return this.link(relationshipType, [ parentNode, targetNode ]);
+									} else {
+										console.error(`No target node to link @`, rel[relationshipTypeId]);
+									}
+								}
 							}
 						}
+
 					}
-				}
-				return {
-					...newData
-				};
+				);
 			}
 		};
 		return AnnuitCœptisII;

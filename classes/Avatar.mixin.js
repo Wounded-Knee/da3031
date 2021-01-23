@@ -1,3 +1,5 @@
+const avatars = [];
+
 const Avatar = {
 	extend: (AnnuitCœptis) => {
 		class AnnuitCœptisII extends AnnuitCœptis {
@@ -7,8 +9,22 @@ const Avatar = {
 				return rv;
 			}
 
+			createAvatar(data) {
+				const newAvatar = this.createData(data);
+				avatars.push(
+					newAvatar
+				);
+				return newAvatar;
+			}
+
+			getAvatars() {
+				return avatars;
+			}
+
 			setAvatar(avatar) {
 				this.avatarCurrent = avatar;
+				const { reRenderCallback = () => {} } = this;
+				reRenderCallback();
 			}
 
 			getAvatar() {

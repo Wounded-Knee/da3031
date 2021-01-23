@@ -28,16 +28,26 @@ const Navigation = {
 
 			navigate(origin, destination) {
 				if (!origin) {
-					this.navCurrentPath = this.createData({
+					this.createData({
 						text: `${this.getAvatar().text}'s Untitled Path`,
 						rel: {
 							[ RT_AUTHOR_OF ]: [ this.getAvatar() ],
 							[ RT_TRAVELER ]: [ this.getAvatar() ]
 						}
+					}).then( (response) => {
+						this.navCurrentPath = response;
+						this.link(
+							this.getRelationshipTypeById(RT_PATH_STEP),
+							[
+								this.navCurrentPath,
+								destination
+							]
+						);
+						this.navigationByNodeCallback(destination);
+					}).catch( (err) => {
+						console.error(err);
 					});
 				}
-				this.link(this.getRelationshipTypeById(RT_PATH_STEP), [ this.navCurrentPath, destination ]);
-				this.navigationByNodeCallback(destination);
 			}
 		};
 		return AnnuitCœptisII;

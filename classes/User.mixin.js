@@ -1,3 +1,5 @@
+const users = [];
+
 const User = {
 	extend: (AnnuitCœptis) => {
 		class AnnuitCœptisII extends AnnuitCœptis {
@@ -7,12 +9,24 @@ const User = {
 				return rv;
 			}
 
+			createUser(data) {
+				const newUser = this.createData(data);
+				users.push(
+					newUser
+				);
+				return newUser;
+			}
+
 			setUser(user) {
 				this.userCurrent = user;
 			}
 
 			getUser() {
 				return this.userCurrent;
+			}
+
+			getUsers() {
+				return users;
 			}
 		};
 		return AnnuitCœptisII;
