@@ -5,18 +5,25 @@ import Relationship from './Relationship.mixin';
 import Navigation from './Navigation.mixin';
 import User from './User.mixin';
 import Avatar from './Avatar.mixin';
-const mixins = [User, Avatar, Relationship, Navigation];
+import config from '../config';
+const {
+	apikey,
+	restdbUrl,
+	restdbTimeout,
+	runStartupScript
+} = config;
+
 const axios = (require('axios')).create({
-	baseURL: 'https://da3031-adea.restdb.io/rest/nodes',
-	timeout: 15000,
+	baseURL: restdbUrl,
+	timeout: restdbTimeout,
 	withCredentials: false,
 	headers: {
 		"cache-control": "no-cache",
 		"Content-Type": "application/json; charset=utf-8",
-		"x-apikey": "600b23461346a1524ff12d30"
+		"x-apikey": apikey
 	}
 });
-const authorId = 100;
+const mixins = [User, Avatar, Relationship, Navigation];
 
 class AnnuitCœptis {
 	constructor(mixins) {
@@ -26,6 +33,7 @@ class AnnuitCœptis {
 			mixins[x].initialize ? mixins[x].initialize(this) : '';
 		}
 		this.setReRenderCallback( () => {} );
+		this.restdb = undefined;
 	}
 
 	link(relationshipType, relatives) {
@@ -48,7 +56,7 @@ class AnnuitCœptis {
 	getDataById(nodeId) {
 		const data = this.data.find(item => item.id === nodeId);
 		if (data === undefined) {
-			console.log(`AnnuitCœptis: Node #${nodeId} not found`);
+			console.warn(`AnnuitCœptis: Node #${nodeId} not found`);
 			return undefined;
 		}
 		return this.hydrateData(data);
@@ -77,19 +85,15 @@ class AnnuitCœptis {
 				})
 				.then(nodeData => {
 					const { reRenderCallback = () => {} } = this;
-					console.log('AXIOS response ', nodeData);
 					this.data.push(nodeData);
 					resolve(nodeData);
 					reRenderCallback();
-					//this.data.push(newData);
 				})
 				.catch(err => {
 					reject();
-					console.error('AXIOS error ', err);
 				})
 		);
 
-		console.warn('AXIOS Promise', promise, this);
 		return promise;
 	}
 
@@ -105,7 +109,6 @@ class AnnuitCœptis {
 		const { reRenderCallback = () => {} } = this;
 		axios
 			.get()
-			.then(res => { console.log('Loaded nodes: ', res); return res; })
 			.then(res => res.data.map(
 				data => {
 					const {
@@ -122,6 +125,10 @@ class AnnuitCœptis {
 					return newData;
 				}
 			))
+			.then(nodes => {
+				console.log(`Loaded ${nodes.length} nodes from the server.`);
+				return nodes;
+			})
 			.then(nodes => this.data = nodes)
 			.then(reRenderCallback)
 			.catch(err => {
@@ -131,6 +138,35 @@ class AnnuitCœptis {
 
 	setReRenderCallback(cb) {
 		this.reRenderCallback = cb;
+	}
+
+	setRestDB(restDB) {
+		if (!this.restdb) {
+			this.restdb = restDB;
+
+			this.getRestDB().on('POST', (error, eventData) => {
+				const {
+					_version, _id,
+					...newData
+				} = eventData.data;
+
+				if (this.getDataById(_id) === undefined) {
+					this.data.push({
+						id: _id,
+						...newData
+					});
+					console.log('RestDB.RDE: Assimilated.', eventData);
+				} else {
+					console.log('RestDB.RDE: ID already exists locally, ignoring.', eventData);
+				}
+			});
+
+			console.log('RestDB.RDE now listening.');
+		}
+	}
+
+	getRestDB() {
+		return this.restdb;
 	}
 
 	_getNewID() {
@@ -147,89 +183,90 @@ for (var x=0, AnnuitCœptisII=AnnuitCœptis; x<mixins.length; x++) {
 // New instance
 const annuitCœptis = new AnnuitCœptisII(mixins);
 
-/*
-// Testing
-const
-	RT_CHILD_OF = 0,
-	RT_AUTHOR_OF = 1,
-	RT_TRAVELER = 2
-;
+if (runStartupScript) {
+	// Testing
+	const
+		RT_CHILD_OF = 0,
+		RT_AUTHOR_OF = 1,
+		RT_TRAVELER = 2
+	;
 
-const nodes = {};
+	const nodes = {};
 
-annuitCœptis.createData({
-	text: 'SYSTEM',
-}).then(
-	(SYSTEM) => {
-		nodes.SYSTEM = SYSTEM;
-		annuitCœptis.setUser(SYSTEM);
-		return SYSTEM;
-	}
-).then(
-	(SYSTEM) => annuitCœptis.createUser({
-		text: 'Joel Kramer',
-		rel: {
-			[ RT_AUTHOR_OF ]: [ SYSTEM ]
+	annuitCœptis.createData({
+		text: 'SYSTEM',
+	}).then(
+		(SYSTEM) => {
+			nodes.SYSTEM = SYSTEM;
+			annuitCœptis.setUser(SYSTEM);
+			return SYSTEM;
 		}
-	})
-).then(
-	(usrJoelKramer) => {
-		nodes.usrJoelKramer = usrJoelKramer;
-		annuitCœptis.setUser(usrJoelKramer);
-		return usrJoelKramer;
-	}
-).then(
-	(usrJoelKramer) => annuitCœptis.createAvatar({
-		text: 'Heyoka',
-		rel: {
-			[ RT_AUTHOR_OF ]: [ usrJoelKramer ]
+	).then(
+		(SYSTEM) => annuitCœptis.createUser({
+			text: 'Joel Kramer',
+			rel: {
+				[ RT_AUTHOR_OF ]: [ SYSTEM ]
+			}
+		})
+	).then(
+		(usrJoelKramer) => {
+			nodes.usrJoelKramer = usrJoelKramer;
+			annuitCœptis.setUser(usrJoelKramer);
+			return usrJoelKramer;
 		}
-	})
-).then(
-	(avaHeyoka) => {
-		nodes.avaHeyoka = avaHeyoka;
-		annuitCœptis.setAvatar(avaHeyoka);
-		return avaHeyoka;
-	}
-).then(
-	() => annuitCœptis.createAvatar({
-		text: 'Drew',
-		rel: {
-			[ RT_AUTHOR_OF ]: [ nodes.usrJoelKramer ]
+	).then(
+		(usrJoelKramer) => annuitCœptis.createAvatar({
+			text: 'Heyoka',
+			rel: {
+				[ RT_AUTHOR_OF ]: [ usrJoelKramer ]
+			}
+		})
+	).then(
+		(avaHeyoka) => {
+			nodes.avaHeyoka = avaHeyoka;
+			annuitCœptis.setAvatar(avaHeyoka);
+			return avaHeyoka;
 		}
-	})
-).then(
-	(avaDrew) => {
-		nodes.avaDrew = avaDrew;
-		return avaDrew;
-	}
-).then(
-	(avaDrew) => annuitCœptis.createData({
-		text: 'Hello, world!',
-		rel: {
-			[ RT_AUTHOR_OF ]: [ nodes.avaHeyoka ]
+	).then(
+		() => annuitCœptis.createAvatar({
+			text: 'Drew',
+			rel: {
+				[ RT_AUTHOR_OF ]: [ nodes.usrJoelKramer ]
+			}
+		})
+	).then(
+		(avaDrew) => {
+			nodes.avaDrew = avaDrew;
+			return avaDrew;
 		}
-	})
-).then(
-	(comHeyoka1) => {
-		nodes.comHeyoka1 = comHeyoka1;
-		return comHeyoka1;
-	}
-).then(
-	(comHeyoka1) => annuitCœptis.createData({
-		text: 'Hi.',
-		rel: {
-			[ RT_AUTHOR_OF ]: [ nodes.avaDrew ],
-			[ RT_CHILD_OF ]: [ comHeyoka1 ]
+	).then(
+		(avaDrew) => annuitCœptis.createData({
+			text: 'Hello, world!',
+			rel: {
+				[ RT_AUTHOR_OF ]: [ nodes.avaHeyoka ]
+			}
+		})
+	).then(
+		(comHeyoka1) => {
+			nodes.comHeyoka1 = comHeyoka1;
+			return comHeyoka1;
 		}
-	})
-).then(
-	() => {
-		annuitCœptis.navigate(undefined, nodes.comHeyoka1);
-		annuitCœptis.navigate(nodes.comHeyoka1, nodes.comDrew1);
-	}
-);
-*/
+	).then(
+		(comHeyoka1) => annuitCœptis.createData({
+			text: 'Hi.',
+			rel: {
+				[ RT_AUTHOR_OF ]: [ nodes.avaDrew ],
+				[ RT_CHILD_OF ]: [ comHeyoka1 ]
+			}
+		})
+	).then(
+		() => {
+			annuitCœptis.navigate(undefined, nodes.comHeyoka1);
+			annuitCœptis.navigate(nodes.comHeyoka1, nodes.comDrew1);
+		}
+	);
+}
+
 export {
 	annuitCœptis
 };

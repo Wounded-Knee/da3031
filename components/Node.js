@@ -11,12 +11,7 @@ const
 	RT_TRAVELER = 2
 ;
 
-export default function Node({ node, context }) {
-	if (!node) {
-		console.log('Bad node? ', node);
-		return null;
-	}
-
+export default function Node({ node, context, nodeId }) {
 	const nodeParent = node.getParents ? node.getParents()[0] : undefined;
 	const nodeAuthor = node.getAuthors ? node.getAuthors()[0] : undefined;
 

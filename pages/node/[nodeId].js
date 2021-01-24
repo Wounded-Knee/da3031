@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import RestDB from '../../classes/restdb';
 import { withRouter } from 'next/router';
 import Node from '../../components/Node';
 import { annuitCœptis, Component } from '../../classes/AnnuitCœptis.class';
@@ -32,9 +33,13 @@ class NodeView extends React.Component {
 	render() {
 		const { nodeId } = this.props.router.query;
 		const activeAvatar = annuitCœptis.getAvatar();
+		const setRestDB = annuitCœptis.setRestDB.bind(annuitCœptis);
+		const node = annuitCœptis.getDataById(nodeId);
 
 		return (
 			<>
+				<RestDB setRestDB={ setRestDB } />
+
 				<header>
 					{ annuitCœptis.getAvatars().map(
 						avatar => <span
@@ -49,9 +54,11 @@ class NodeView extends React.Component {
 
 				</header>
 
-				<ol className="nodes">
-					<Node node={ annuitCœptis.getDataById(nodeId) } />
-				</ol>
+				{ node ? (
+					<ol className="nodes">
+						<Node node={ node } />
+					</ol>
+				) : <p>{ `Node #${nodeId} not found.` }</p> }
 
 	 			<JsonView obj={ annuitCœptis.getData() } showLineNumbers />
 			</>

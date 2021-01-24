@@ -136,7 +136,7 @@ const Relationship = {
 											console.error(`hydrateData(${relationshipType.text}): Cannot find ${node.text}'s' ${title} with a bad ID#${relationshipNode.relatives[titleIndex]}`);
 											return {};
 										} else {
-											console.log(`hydrateData(${relationshipType.text}): ${superData.text} (#${superData.id}) => ${relatedNode.text} (#${relatedNode.id})`);
+											console.log(`hydrateData(${relationshipType.text}): ${superData.text} (#${superData.id}) ${title.s} of ${relatedNode.text} (#${relatedNode.id})`);
 											return relatedNode;
 										}
 									}

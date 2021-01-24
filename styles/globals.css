@@ -50,3 +50,7 @@ header span {
 
 @import url(./jsonview.css);
 @import url(../node_modules/react-tabs/style/react-tabs.css);
+
+.jsonview-code {
+  height: 600px;
+}
