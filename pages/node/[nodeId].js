@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import RestDB from '../../classes/restdb';
 import { withRouter } from 'next/router';
 import Node from '../../components/Node';
+import NodeSelector from '../../components/NodeSelector';
 import { annuitCœptis, Component } from '../../classes/AnnuitCœptis.class';
 import { JsonView } from 'json-view-for-react';
 
@@ -11,17 +12,13 @@ class NodeView extends React.Component {
 		this.state = {
 			renderCount: 0
 		};
-		annuitCœptis.setNavigationByNodeCallback( this.navigateToNode.bind(this) );
+		//annuitCœptis.setNavigationByNodeCallback( this.navigateToNode.bind(this) );
 		annuitCœptis.setReRenderCallback( this.reRender.bind(this) );
 	}
 
 	navigateToNode(node) {
 		const { router } = this.props;
 		router.push(`/node/${node.id}`);
-	}
-
-	setUser(user) {
-		annuitCœptis.setUser(user);
 	}
 
 	reRender() {
@@ -33,14 +30,23 @@ class NodeView extends React.Component {
 	render() {
 		const { nodeId } = this.props.router.query;
 		const activeAvatar = annuitCœptis.getAvatar();
-		const setRestDB = annuitCœptis.setRestDB.bind(annuitCœptis);
 		const node = annuitCœptis.getDataById(nodeId);
 
 		return (
 			<>
-				<RestDB setRestDB={ setRestDB } />
+				<RestDB />
 
 				<header>
+					{
+						Object.keys(annuitCœptis.status).map(
+							(statusAttr) => annuitCœptis.status[statusAttr] ? (
+								<span className={ annuitCœptis.status[statusAttr] ? 'true' : 'false' }>
+									{ statusAttr }
+								</span>
+							) : null
+						)
+					}
+
 					{ annuitCœptis.getAvatars().map(
 						avatar => <span
 							onClick={ annuitCœptis.setAvatar.bind(annuitCœptis, avatar) }
@@ -49,16 +55,34 @@ class NodeView extends React.Component {
 					) }
 
 					<span onClick={ this.reRender.bind(this) }>R{ this.state.renderCount }</span>
-					<span>N{ annuitCœptis.data.length }</span>
-					<span onClick={ annuitCœptis.loadData.bind(annuitCœptis) } title="Load nodes from server">💥</span>
 
+					{ annuitCœptis.isInitialized() ? (
+						<NodeSelector createNode={ (txt) => annuitCœptis.createData({ text: txt }) } />
+					) : null }
+
+					<span>N{ annuitCœptis.data.length }</span>
 				</header>
 
-				{ node ? (
-					<ol className="nodes">
-						<Node node={ node } />
-					</ol>
-				) : <p>{ `Node #${nodeId} not found.` }</p> }
+				{
+					annuitCœptis.status.dataLoading
+						? (
+							"Loading..."
+						) : (
+							annuitCœptis.isInitialized()
+								? (
+									node
+										? (
+											<ol className="nodes">
+												<Node node={ node } />
+											</ol>
+										) : (
+											<p>{ `Node #${nodeId} not found.` }</p>
+										)
+								) : (
+									"Loading error."
+								)
+						)
+				}
 
 	 			<JsonView obj={ annuitCœptis.getData() } showLineNumbers />
 			</>

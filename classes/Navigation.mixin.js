@@ -36,13 +36,14 @@ const Navigation = {
 						}
 					}).then( (response) => {
 						this.navCurrentPath = response;
-						this.link(
+						return this.link(
 							this.getRelationshipTypeById(RT_PATH_STEP),
 							[
 								this.navCurrentPath,
 								destination
 							]
 						);
+					}).then( () => {
 						this.navigationByNodeCallback(destination);
 					}).catch( (err) => {
 						console.error(err);

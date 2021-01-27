@@ -23,24 +23,32 @@ export default class NodeSelector extends React.Component {
 
 	onCreateOption = (txt) => {
 		const { selectOnCreate = false, createNode } = this.props;
-		const newNode = createNode(txt);
 
 		this.setState({ isLoading: true });
 		console.group('Option creating: ', txt);
 		console.log('Wait a moment...');
-    	setTimeout(() => {
-			console.log('Creation complete');
-			console.groupEnd();
-      		this.setState({
-				isLoading: false,
-				options: [
-					...this.state.options,
-					newNode
-				],
-				selectedOption: newNode
-			});
-			if (selectOnCreate) this.handleChange( this.nodeToOption(newNode) );
-		}, 250);
+		const newNode = createNode(txt)
+			.then(
+				() => {
+					console.log('Creation complete');
+					console.groupEnd();
+		      		this.setState({
+						isLoading: false,
+						options: [
+							...this.state.options,
+							newNode
+						],
+						selectedOption: newNode
+					});
+					if (selectOnCreate) this.handleChange( this.nodeToOption(newNode) );
+				}
+			)
+			.catch(
+				(err) => {
+					console.error('No good.');
+					console.groupEnd();
+				}
+			)
 	};
 
 	nodeToOption = (node) => ( node ? {
@@ -50,7 +58,10 @@ export default class NodeSelector extends React.Component {
 
 	render() {
 		const { selectedOption, options } = this.state;
-		const newOptions = this.props.nodeOptions.map( this.nodeToOption );
+		const { nodeOptions } = this.props;
+		const newOptions = nodeOptions
+			? this.props.nodeOptions.map( this.nodeToOption )
+			: [];
 
 		console.log('Rendering NodeSelector with options ', newOptions);
 

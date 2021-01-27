@@ -87,7 +87,6 @@ const Relationship = {
 			}
 
 			link(relationshipType, relatives) {
-				//console.log(`Relationship type #${relationshipType.id} created between ${node1.text} and ${node2.text}`);
 				if (!relationshipType) {
 					console.log(`link() error: No relationship type`, relationshipType);
 					return new Promise(
@@ -100,10 +99,15 @@ const Relationship = {
 						(res, rej) => rej()
 					);
 				}
+				console.group(`Relationship: Linking ${node1.text} and ${node2.text} as ${relationshipType.text}`);
 				return this.createData({
 					relationType_id: relationshipType.id,
 					relatives: relatives.map( relative => relative.id )
-				});
+				}).then(
+					() => {
+						console.groupEnd();
+					}
+				);
 			}
 
 			hydrateData(data) {
@@ -158,8 +162,15 @@ const Relationship = {
 								for (var y=0; y<rel[relationshipTypeId].length; y++) {
 									const targetNode = rel[relationshipTypeId][y];
 									if (targetNode) {
-										console.log(`${parentNode.text}(#${parentNode.id}) is now ${relationshipType.titles[0].s} of ${targetNode.text}(#${targetNode.id})`);
-										return this.link(relationshipType, [ parentNode, targetNode ]);
+										return this
+											.link(relationshipType, [ parentNode, targetNode ])
+											.then((res) => {
+												console.log(`${parentNode.text}(#${parentNode.id}) is now ${relationshipType.titles[0].s} of ${targetNode.text}(#${targetNode.id})`);
+												return res;
+											})
+											.catch((err) => {
+												console.error(`Relationship link failed: ${parentNode.text}(#${parentNode.id}) as ${relationshipType.titles[0].s} of ${targetNode.text}(#${targetNode.id})`);
+											});
 									} else {
 										console.error(`No target node to link @`, rel[relationshipTypeId]);
 									}

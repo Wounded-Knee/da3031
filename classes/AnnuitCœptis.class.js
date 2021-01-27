@@ -1,46 +1,56 @@
-import test from './test.mixin';
 import NodeType from './NodeType.mixin';
 import Author from './Author.mixin';
 import Relationship from './Relationship.mixin';
-import Navigation from './Navigation.mixin';
 import User from './User.mixin';
 import Avatar from './Avatar.mixin';
 import config from '../config';
+import EventEmitter from 'events';
 const {
 	apikey,
 	restdbUrl,
 	restdbTimeout,
 	runStartupScript
 } = config;
-
-const axios = (require('axios')).create({
-	baseURL: restdbUrl,
-	timeout: restdbTimeout,
-	withCredentials: false,
-	headers: {
-		"cache-control": "no-cache",
-		"Content-Type": "application/json; charset=utf-8",
-		"x-apikey": apikey
-	}
-});
-const mixins = [User, Avatar, Relationship, Navigation];
+const mixins = [User, Avatar, Relationship];
 
 class AnnuitCœptis {
 	constructor(mixins) {
 		this.data = [];
-		this.lastId = 0;
-		for (var x=0; x<mixins.length; x++) {
-			mixins[x].initialize ? mixins[x].initialize(this) : '';
-		}
+		this.ee = new EventEmitter();
 		this.setReRenderCallback( () => {} );
+		this.status = {
+			dataLoading: false,
+			dataLoaded: false,
+			dbConnected: false,
+			hasWindowReference: false,
+		};
 		this.restdb = undefined;
+
+		this.once('dbConnect', this.loadData.bind(this));
 	}
 
-	link(relationshipType, relatives) {
-		return this.createData({
-			relationshipType_id: relationshipType.id,
-			relatives: relatives.map( relative => relative.id )
-		});
+	on(eventName, callBack) {
+		return this.ee.on(eventName, callBack);
+	}
+
+	once(eventName, callBack) {
+		return this.ee.once(eventName, callBack);
+	}
+
+	isInitialized() {
+		const {
+			dataLoaded,
+			dataLoading,
+			dbConnected,
+			hasWindowReference
+		} = this.status;
+
+		return (
+			dataLoaded &&
+			!dataLoading &&
+			dbConnected &&
+			hasWindowReference
+		);
 	}
 
 	getData() {
@@ -68,30 +78,38 @@ class AnnuitCœptis {
 	}
 
 	createData(data) {
+		if (!this.isInitialized()) {
+			console.error('Data cannot be created until app initializes.', this.status);
+			return new Promise((r,a) => {});
+		}
 		const newData = this.conceiveData(data);
+		const nodeClass = this.getRestDB().nodes;
+		const newNode = new nodeClass({ data: newData, silo_id: 0 });
 		const promise = new Promise(
-			(resolve, reject) => axios
-				.post(undefined, JSON.stringify(data))
-				.then(res => {
-					const {
-						_changed, _changedby, _created, _createdby, _keywords, _tags, _version, _id,
-						...nodeData
-					} = res.data;
-					return {
-						id: _id,
-						date: _created,
-						...nodeData
-					};
-				})
-				.then(nodeData => {
-					const { reRenderCallback = () => {} } = this;
-					this.data.push(nodeData);
-					resolve(nodeData);
-					reRenderCallback();
-				})
-				.catch(err => {
-					reject();
-				})
+			(resolve, reject) => newNode.save(
+				(err, node) => {
+					console.log('created node ', node);
+					if (node._id) {
+						const {
+							_changed, _changedby, _created, _createdby, _keywords, _tags, _version, _id,
+							...nodeData
+						} = node.data;
+						const newNodeDataReturned = {
+							id: _id,
+							date: _created,
+							...nodeData
+						};
+
+						const { reRenderCallback = () => {} } = this;
+						this.data.push(newNodeDataReturned);
+						resolve(newNodeDataReturned);
+						reRenderCallback();
+					} else {
+						console.error('Error creating data ', node);
+						reject(node);
+					}
+				}
+			)
 		);
 
 		return promise;
@@ -105,35 +123,48 @@ class AnnuitCœptis {
 	}
 
 	loadData() {
-		console.log('Loading Data', annuitCœptis);
+		const nodeClass = this.getRestDB().nodes;
+		this.status.dataLoaded = false;
+		this.status.dataLoading = true;
+		console.log('Loading Data', this);
 		const { reRenderCallback = () => {} } = this;
-		axios
-			.get()
-			.then(res => res.data.map(
-				data => {
-					const {
-						_changed, _changedby, _created, _createdby, _keywords, _tags, _version, _id,
-						...nodeData
-					} = data;
 
-					const newData = {
-						id: _id,
-						date: _created,
-						...nodeData
-					};
+		return new Promise(
+			(resolve, reject) => {
+				nodeClass.find({}, {},
+					(err, nodes) => {
+						if (!err) {
+							this.data = nodes.map(
+								data => {
+									const {
+										_changed, _changedby, _created, _createdby, _keywords, _tags, _version, _id,
+										...nodeData
+									} = data;
 
-					return newData;
-				}
-			))
-			.then(nodes => {
-				console.log(`Loaded ${nodes.length} nodes from the server.`);
-				return nodes;
-			})
-			.then(nodes => this.data = nodes)
-			.then(reRenderCallback)
-			.catch(err => {
-				console.error('AXIOS error ', err);
-			});
+									const newData = {
+										id: _id,
+										date: _created,
+										...nodeData
+									};
+
+									return newData;
+								}
+							);
+							this.status.dataLoaded = true;
+							this.status.dataLoading = false;
+							this.reRenderCallback();
+							console.log(`Loaded ${nodes.length} nodes from the server.`);
+							resolve();
+						} else {
+							this.status.dataLoaded = false;
+							this.status.dataLoading = false;
+							console.error('DB error ', err);
+							reject();
+						}
+					}
+				);
+			}
+		);
 	}
 
 	setReRenderCallback(cb) {
@@ -161,17 +192,22 @@ class AnnuitCœptis {
 				}
 			});
 
+			this.status.dbConnected = true;
+			this.ee.emit('dbConnect');
 			console.log('RestDB.RDE now listening.');
+		}
+	}
+
+	setWindow(window) {
+		if (window) {
+			this.window = window;
+			window.annuitCœptis = this;
+			this.status.hasWindowReference = true;
 		}
 	}
 
 	getRestDB() {
 		return this.restdb;
-	}
-
-	_getNewID() {
-		const id = this.lastId++;
-		return id;
 	}
 };
 
