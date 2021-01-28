@@ -58,6 +58,12 @@ class AnnuitCœptis {
 		return this.data.filter(criteriaFunc).map(this.hydrateData.bind(this));
 	}
 
+	getOrphans() {
+		return this.filter(
+			(node) => this.hydrateData(node).getParents().length === 0
+		);
+	}
+
 	getDataById(nodeId) {
 		const data = this.data.find(item => item.id === nodeId);
 		if (data === undefined) {

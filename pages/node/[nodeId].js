@@ -37,6 +37,9 @@ class NodeView extends React.Component {
 				<RestDB />
 
 				<header>
+					<span onClick={ this.reRender.bind(this) }>R{ this.state.renderCount }</span>
+					<span>N{ annuitCœptis.data.length }</span>
+
 					{
 						Object.keys(annuitCœptis.status).map(
 							(statusAttr) => annuitCœptis.status[statusAttr] ? (
@@ -56,15 +59,11 @@ class NodeView extends React.Component {
 							className={ activeAvatar === avatar ? 'active' : '' }
 						>{ avatar.text }</span>
 					) }
-
-					<span onClick={ this.reRender.bind(this) }>R{ this.state.renderCount }</span>
-
-					{ annuitCœptis.isInitialized() ? (
-						<NodeSelector createNode={ (txt) => annuitCœptis.createData({ text: txt }) } />
-					) : null }
-
-					<span>N{ annuitCœptis.data.length }</span>
 				</header>
+
+				{ annuitCœptis.isInitialized() ? (
+					<NodeSelector createNode={ (txt) => annuitCœptis.createData({ text: txt }) } />
+				) : null }
 
 				{
 					annuitCœptis.status.dataLoading
@@ -73,14 +72,22 @@ class NodeView extends React.Component {
 						) : (
 							annuitCœptis.isInitialized()
 								? (
-									node
-										? (
-											<ol className="nodes">
-												<Node node={ node } />
-											</ol>
-										) : (
-											<p>{ `Node #${nodeId} not found.` }</p>
-										)
+									<ol className="nodes">
+										{ node
+											? <Node node={ node } />
+											: <p>{ `Node #${nodeId} not found.` }</p>
+										}
+										{
+											annuitCœptis.getOrphans().filter(
+												(orphan) => orphan.id !== nodeId
+											).map(
+												(orphan) => <Node
+													key={ orphan.id }
+													node={ orphan }
+												/>
+											)
+										}
+									</ol>
 								) : (
 									"Loading error."
 								)

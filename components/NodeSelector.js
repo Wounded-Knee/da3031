@@ -45,7 +45,7 @@ export default class NodeSelector extends React.Component {
 			)
 			.catch(
 				(err) => {
-					console.error('No good.');
+					console.error('No good.', err);
 					console.groupEnd();
 				}
 			)
@@ -62,8 +62,6 @@ export default class NodeSelector extends React.Component {
 		const newOptions = nodeOptions
 			? this.props.nodeOptions.map( this.nodeToOption )
 			: [];
-
-		console.log('Rendering NodeSelector with options ', newOptions);
 
 		return (
 			<Creatable

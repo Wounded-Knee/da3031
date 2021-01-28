@@ -99,7 +99,7 @@ const Relationship = {
 						(res, rej) => rej()
 					);
 				}
-				console.group(`Relationship: Linking ${node1.text} and ${node2.text} as ${relationshipType.text}`);
+				console.group(`Relationship: Linking nodes ${relatives.map( rel => rel.text ).join(', ') } as ${relationshipType.text}`);
 				return this.createData({
 					relationType_id: relationshipType.id,
 					relatives: relatives.map( relative => relative.id )

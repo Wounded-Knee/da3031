@@ -36,8 +36,6 @@ export default function NodeRelationList({ rootNode, blacklist, whitelist }) {
 		}, {}
 	);
 
-	console.log('tablist', tabList);
-
 	if (annuitCœptis.getRelationshipTypes) {
 		return (
 			<Tabs>
