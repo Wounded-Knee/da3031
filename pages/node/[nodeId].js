@@ -40,7 +40,10 @@ class NodeView extends React.Component {
 					{
 						Object.keys(annuitCœptis.status).map(
 							(statusAttr) => annuitCœptis.status[statusAttr] ? (
-								<span className={ annuitCœptis.status[statusAttr] ? 'true' : 'false' }>
+								<span
+									key={ statusAttr }
+									className={ annuitCœptis.status[statusAttr] ? 'true' : 'false' }
+								>
 									{ statusAttr }
 								</span>
 							) : null

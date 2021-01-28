@@ -5,12 +5,7 @@ import User from './User.mixin';
 import Avatar from './Avatar.mixin';
 import config from '../config';
 import EventEmitter from 'events';
-const {
-	apikey,
-	restdbUrl,
-	restdbTimeout,
-	runStartupScript
-} = config;
+const { runStartupScript } = config;
 const mixins = [User, Avatar, Relationship];
 
 class AnnuitCœptis {
@@ -88,17 +83,23 @@ class AnnuitCœptis {
 		const promise = new Promise(
 			(resolve, reject) => newNode.save(
 				(err, node) => {
-					console.log('created node ', node);
 					if (node._id) {
 						const {
-							_changed, _changedby, _created, _createdby, _keywords, _tags, _version, _id,
+							_id, _created
+						} = node;
+						const {
+							_changed, _changedby, _createdby, _keywords, _tags, _version,
+							date, id,
 							...nodeData
 						} = node.data;
 						const newNodeDataReturned = {
 							id: _id,
 							date: _created,
+							creator: 'createData()',
 							...nodeData
 						};
+
+						console.log('created node ', newNodeDataReturned, ' using data ', node, ' with id ', _id);
 
 						const { reRenderCallback = () => {} } = this;
 						this.data.push(newNodeDataReturned);
@@ -144,7 +145,8 @@ class AnnuitCœptis {
 									const newData = {
 										id: _id,
 										date: _created,
-										...nodeData
+										creator: 'loadData()',
+										...nodeData.data
 									};
 
 									return newData;
@@ -184,6 +186,7 @@ class AnnuitCœptis {
 				if (this.getDataById(_id) === undefined) {
 					this.data.push({
 						id: _id,
+						creator: 'setRestDB()',
 						...newData
 					});
 					console.log('RestDB.RDE: Assimilated.', eventData);
