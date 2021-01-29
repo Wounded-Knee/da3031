@@ -40,11 +40,11 @@ export default function NodeRelationList({ rootNode, blacklist, whitelist }) {
 		return (
 			<Tabs>
 				<TabList>
-					{ Object.keys(tabList).map(tab => <Tab>{ tab }</Tab>) }
+					{ Object.keys(tabList).map(tab => <Tab key={ tab }>{ tab }</Tab>) }
 				</TabList>
 
 				{ Object.keys(tabList).map(tab => (
-					<TabPanel>
+					<TabPanel key={ tab }>
 						<NodeList
 							nodes={ tabList[tab] }
 							nodeDisplay={ NodeDisplay }

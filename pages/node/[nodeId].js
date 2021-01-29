@@ -79,7 +79,7 @@ class NodeView extends React.Component {
 										}
 										{
 											annuitCœptis.getOrphans().filter(
-												(orphan) => orphan.id !== nodeId
+												(orphan) => orphan.id !== nodeId && orphan.relationType_id === undefined
 											).map(
 												(orphan) => <Node
 													key={ orphan.id }
@@ -94,7 +94,10 @@ class NodeView extends React.Component {
 						)
 				}
 
-	 			<JsonView obj={ annuitCœptis.getData() } showLineNumbers />
+	 			<JsonView
+	 				obj={ annuitCœptis.getData() }
+	 				showLineNumbers
+	 			/>
 			</>
 		);
 	}

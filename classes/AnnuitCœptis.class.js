@@ -3,10 +3,11 @@ import Author from './Author.mixin';
 import Relationship from './Relationship.mixin';
 import User from './User.mixin';
 import Avatar from './Avatar.mixin';
+import Navigation from './Navigation.mixin';
 import config from '../config';
 import EventEmitter from 'events';
 const { runStartupScript } = config;
-const mixins = [User, Avatar, Relationship];
+const mixins = [User, Avatar, Relationship, Navigation];
 
 class AnnuitCœptis {
 	constructor(mixins) {
