@@ -15,6 +15,10 @@ a {
   box-sizing: border-box;
 }
 
+.nodes {
+  padding: 0;
+}
+
 .node.type_User .text {
   font-size: 100px;
 }

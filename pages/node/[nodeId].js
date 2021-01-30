@@ -1,106 +1,88 @@
-import React from 'react';
-import RestDB from '../../classes/restdb';
-import { withRouter } from 'next/router';
+import Head from 'next/head'
+import Link from 'next/link'
+import styles from '../../styles/NodeView.module.css'
+import Layout from '../../components/Layout';
 import Node from '../../components/Node';
 import NodeSelector from '../../components/NodeSelector';
-import { annuitCœptis, Component } from '../../classes/AnnuitCœptis.class';
 import { JsonView } from 'json-view-for-react';
+import { Consumer } from '../../classes/Provider';
 
-class NodeView extends React.Component {
-	constructor() {
-		super();
-		this.state = {
-			renderCount: 0
-		};
-		//annuitCœptis.setNavigationByNodeCallback( this.navigateToNode.bind(this) );
-		annuitCœptis.setReRenderCallback( this.reRender.bind(this) );
-	}
+export default function NodeView() {
+	return (
+		<Consumer>
+			{
+				({ annuitCœptis, router, rc }) => {
+					const nodeId = router ? router.query.nodeId : '';
+					const node = annuitCœptis.getDataById(nodeId);
 
-	navigateToNode(node) {
-		const { router } = this.props;
-		router.push(`/node/${node.id}`);
-	}
+					return (
+						<Layout title="Node View">
+							<header>
+								<span onClick={ annuitCœptis.reRenderCallback.bind(annuitCœptis) }>R{ rc }</span>
+								<span>N{ annuitCœptis.data.length }</span>
 
-	reRender() {
-		this.setState({
-			renderCount: this.state.renderCount+1
-		});
-	}
+								{
+									Object.keys(annuitCœptis.status).map(
+										(statusAttr) => annuitCœptis.status[statusAttr] ? (
+											<span
+												key={ statusAttr }
+												className={ annuitCœptis.status[statusAttr] ? 'true' : 'false' }
+											>
+												{ statusAttr }
+											</span>
+										) : null
+									)
+								}
 
-	render() {
-		const { nodeId } = this.props.router.query;
-		const activeAvatar = annuitCœptis.getAvatar();
-		const node = annuitCœptis.getDataById(nodeId);
+								{ annuitCœptis.getAvatars().map(
+									avatar => <span
+										onClick={ annuitCœptis.setAvatar.bind(annuitCœptis, avatar) }
+										className={ activeAvatar === avatar ? 'active' : '' }
+									>{ avatar.text }</span>
+								) }
+							</header>
 
-		return (
-			<>
-				<RestDB />
+							{ annuitCœptis.isInitialized() ? (
+								<NodeSelector createNode={ (txt) => annuitCœptis.createData({ text: txt }) } />
+							) : null }
 
-				<header>
-					<span onClick={ this.reRender.bind(this) }>R{ this.state.renderCount }</span>
-					<span>N{ annuitCœptis.data.length }</span>
-
-					{
-						Object.keys(annuitCœptis.status).map(
-							(statusAttr) => annuitCœptis.status[statusAttr] ? (
-								<span
-									key={ statusAttr }
-									className={ annuitCœptis.status[statusAttr] ? 'true' : 'false' }
-								>
-									{ statusAttr }
-								</span>
-							) : null
-						)
-					}
-
-					{ annuitCœptis.getAvatars().map(
-						avatar => <span
-							onClick={ annuitCœptis.setAvatar.bind(annuitCœptis, avatar) }
-							className={ activeAvatar === avatar ? 'active' : '' }
-						>{ avatar.text }</span>
-					) }
-				</header>
-
-				{ annuitCœptis.isInitialized() ? (
-					<NodeSelector createNode={ (txt) => annuitCœptis.createData({ text: txt }) } />
-				) : null }
-
-				{
-					annuitCœptis.status.dataLoading
-						? (
-							"Loading..."
-						) : (
-							annuitCœptis.isInitialized()
-								? (
-									<ol className="nodes">
-										{ node
-											? <Node node={ node } />
-											: <p>{ `Node #${nodeId} not found.` }</p>
-										}
-										{
-											annuitCœptis.getOrphans().filter(
-												(orphan) => orphan.id !== nodeId && orphan.relationType_id === undefined
-											).map(
-												(orphan) => <Node
-													key={ orphan.id }
-													node={ orphan }
-												/>
+							{
+								annuitCœptis.status.dataLoading
+									? (
+										"Loading..."
+									) : (
+										annuitCœptis.isInitialized()
+											? (
+												<ol className="nodes">
+													{ node
+														? <Node node={ node } />
+														: <p>{ `Node #${nodeId} not found.` }</p>
+													}
+													{
+														annuitCœptis.getOrphans().filter(
+															(orphan) => orphan.id !== nodeId && orphan.relationType_id === undefined
+														).map(
+															(orphan) => <Node
+																key={ orphan.id }
+																node={ orphan }
+															/>
+														)
+													}
+												</ol>
+											) : (
+												"Loading error."
 											)
-										}
-									</ol>
-								) : (
-									"Loading error."
-								)
-						)
+									)
+							}
+
+				 			<JsonView
+				 				obj={ annuitCœptis.getData() }
+				 				showLineNumbers
+				 			/>
+						</Layout>
+					);
 				}
-
-	 			<JsonView
-	 				obj={ annuitCœptis.getData() }
-	 				showLineNumbers
-	 			/>
-			</>
-		);
-	}
+			}
+		</Consumer>
+	)
 };
-
-export default withRouter(NodeView);
