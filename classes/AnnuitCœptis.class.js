@@ -18,7 +18,7 @@ class AnnuitCœptis {
 			dataLoading: false,
 			dataLoaded: false,
 			dbConnected: false,
-			hasWindowReference: false,
+			hasWinRef: false,
 		};
 		this.restdb = undefined;
 
@@ -38,14 +38,14 @@ class AnnuitCœptis {
 			dataLoaded,
 			dataLoading,
 			dbConnected,
-			hasWindowReference
+			hasWinRef
 		} = this.status;
 
 		return (
 			dataLoaded &&
 			!dataLoading &&
 			dbConnected &&
-			hasWindowReference
+			hasWinRef
 		);
 	}
 
@@ -212,7 +212,7 @@ class AnnuitCœptis {
 		if (window) {
 			this.window = window;
 			window.annuitCœptis = this;
-			this.status.hasWindowReference = true;
+			this.status.hasWinRef = true;
 		}
 	}
 

@@ -20,26 +20,28 @@ export default function NodeView() {
 							{
 								annuitCœptis.status.dataLoading
 									? (
-										"Loading..."
+										<div className="loading">Loading...</div>
 									) : (
 										annuitCœptis.isInitialized()
 											? (
-												<ol className="nodes">
-													{ node
-														? <Node node={ node } />
-														: <p>{ `Node #${nodeId} not found.` }</p>
-													}
-												</ol>
+												<>
+													<ol className="nodes">
+														{ node
+															? <Node node={ node } />
+															: <p>{ `Node #${nodeId} not found.` }</p>
+														}
+													</ol>
+
+										 			<JsonView
+										 				obj={ annuitCœptis.getData() }
+										 				showLineNumbers
+										 			/>
+										 		</>
 											) : (
 												"Loading error."
 											)
 									)
 							}
-
-				 			<JsonView
-				 				obj={ annuitCœptis.getData() }
-				 				showLineNumbers
-				 			/>
 						</Layout>
 					);
 				}

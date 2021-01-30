@@ -27,10 +27,10 @@ export default class NodeSelector extends React.Component {
 		this.setState({ isLoading: true });
 		console.group('Option creating: ', txt);
 		console.log('Wait a moment...');
-		const newNode = createNode(txt)
+		createNode(txt)
 			.then(
-				() => {
-					console.log('Creation complete');
+				(newNode) => {
+					console.log('Creation complete, here is the new node: ', newNode);
 					console.groupEnd();
 		      		this.setState({
 						isLoading: false,

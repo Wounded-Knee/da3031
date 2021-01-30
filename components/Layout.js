@@ -19,7 +19,7 @@ const Layout = props => (
 							<header>
 								<Link href="/">
 									<a title="Back to home screen.">
-										<span>
+										<span className="logo">
 											D<sup>3</sup>
 										</span>
 									</a>
@@ -42,7 +42,7 @@ const Layout = props => (
 										(statusAttr) => annuitCœptis.status[statusAttr] ? (
 											<span
 												key={ statusAttr }
-												className={ annuitCœptis.status[statusAttr] ? 'true' : 'false' }
+												className={ 'status ' + (annuitCœptis.status[statusAttr] ? 'true' : 'false') }
 											>
 												{ statusAttr }
 											</span>

@@ -15,10 +15,20 @@ a {
   box-sizing: border-box;
 }
 
+.loading {
+  font-size: 3em;
+  text-align: center;
+  margin: auto;
+}
+
+/* NODE LIST
+**************/
 .nodes {
   padding: 0;
 }
 
+/* NODE
+*********/
 .node.type_User .text {
   font-size: 100px;
 }
@@ -51,6 +61,10 @@ header {
   box-shadow: 0px 0px 17px -1px rgba(0,0,0,0.55);
 }
 
+header span.status {
+  font-size: 0.75em;
+}
+
 header span.true {
   color: green;
 }
@@ -64,6 +78,17 @@ header span.active {
 
 header span {
   margin-right: 2em;
+}
+
+main h1,
+header .logo {
+  color: #0070f3;
+  font-weight: bold;
+  background: url(https://media4.giphy.com/media/1zhHiGwQiu2CaGj1uE/giphy.gif) no-repeat;
+  background-size: cover;
+  background-position: center;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 @import url(./jsonview.css);

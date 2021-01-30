@@ -10,7 +10,7 @@ class AnnuitCœptis extends React.Component {
 		this.state = {
 			renderCount: 0
 		};
-		//annuitCœptis.setNavigationByNodeCallback( this.navigateToNode.bind(this) );
+		annuitCœptis.setNavigationByNodeCallback( this.navigateToNode.bind(this) );
 		annuitCœptis.setReRenderCallback( this.reRender.bind(this) );
 	}
 
@@ -32,7 +32,7 @@ class AnnuitCœptis extends React.Component {
 			rc: this.state.renderCount,
 			router: router
 		};
-		console.log('Router ', router);
+
 		return (
 			<Provider value={ providerData }>
 				<RestDB />
