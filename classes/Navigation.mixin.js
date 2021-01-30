@@ -37,7 +37,7 @@ const Navigation = {
 
 			navigate(origin, destination) {
 				console.log('Navigating from ', origin, ' to ', destination);
-				if (!origin) {
+				if (!origin && this.getAvatar()) {
 					this.createData({
 						text: `${this.getAvatar().text}'s Untitled Path`,
 						rel: {
@@ -53,8 +53,9 @@ const Navigation = {
 								destination
 							]
 						);
-					}).then( () => {
+					}).then( (input) => {
 						this.navigationByNodeCallback(destination);
+						return input;
 					}).catch( (err) => {
 						console.error(err);
 					});

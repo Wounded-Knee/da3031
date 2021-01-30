@@ -178,7 +178,7 @@ const Relationship = {
 								}
 							}
 						}
-
+						return parentNode;
 					}
 				);
 			}

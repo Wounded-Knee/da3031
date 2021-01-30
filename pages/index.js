@@ -2,6 +2,7 @@ import Head from 'next/head'
 import Link from 'next/link'
 import styles from '../styles/Home.module.css'
 import Layout from '../components/Layout';
+import NodeSelector from '../components/NodeSelector';
 import { Consumer } from '../classes/Provider';
 
 export default function Home(props) {
@@ -9,7 +10,9 @@ export default function Home(props) {
     <Consumer>
       {
         ({ annuitCœptis, router, rc }) => {
-          const firstNode = annuitCœptis.getOrphans()[0];
+          const orphans = annuitCœptis.getOrphans().filter(
+            (orphan) => orphan.relationType_id === undefined
+          );
 
           return (
         		<Layout { ...props }>
@@ -22,20 +25,30 @@ export default function Home(props) {
         			</p>
 
               { annuitCœptis.isInitialized() ? (
-          			<div className={styles.grid}>
-                  {
-                    annuitCœptis.getOrphans().filter(
-                      (orphan) => orphan.relationType_id === undefined
-                    ).map(
-                      (orphan) => <Link key={ orphan.id } href={ `/node/${orphan.id}` }>
-                          <a className={styles.card}>
-                            <h3>{ orphan.text }</h3>
-                            <p>Begin Communicating Here</p>
-                          </a>
-                        </Link>
-                    )
-                  }
-          			</div>
+                <>
+                  <NodeSelector
+                    selectOnCreate={ true }
+                    onSelect={ annuitCœptis.navigate.bind(annuitCœptis, undefined) }
+                    createNode={
+                      (text) => annuitCœptis.createData({
+                        text
+                      }).then((x) => { console.log('eeg', x); return x; })
+                    }
+                  />
+
+            			<div className={styles.grid}>
+                    {
+                      orphans.map(
+                        (orphan) => <Link key={ orphan.id } href={ `/node/${orphan.id}` }>
+                            <a className={styles.card}>
+                              <h3>{ orphan.text }</h3>
+                              <p>Begin Communicating Here</p>
+                            </a>
+                          </Link>
+                      )
+                    }
+            			</div>
+                </>
               ) : <div className="loading">Loading...</div> }
         		</Layout>
           );

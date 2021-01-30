@@ -6,7 +6,12 @@ import Avatar from './Avatar.mixin';
 import Navigation from './Navigation.mixin';
 import config from '../config';
 import EventEmitter from 'events';
-const { runStartupScript } = config;
+import restDBDirect from './RestDBDirect.class';
+const {
+	runStartupScript,
+	dbType,
+	dbTypeConstants,
+} = config;
 const mixins = [User, Avatar, Relationship, Navigation];
 
 class AnnuitCœptis {
@@ -17,12 +22,23 @@ class AnnuitCœptis {
 		this.status = {
 			dataLoading: false,
 			dataLoaded: false,
-			dbConnected: false,
+			dbConnected: (dbType === dbTypeConstants.DB_TYPE_REALTIME) ? false : true,
 			hasWinRef: false,
 		};
 		this.restdb = undefined;
 
+		console.log('AnnuitCœptis constructor');
+
 		this.once('dbConnect', this.loadData.bind(this));
+
+		if (dbType === dbTypeConstants.DB_TYPE_AXIOS) {
+			console.log('emit dbcon');
+			this.ee.emit('dbConnect');
+		}
+	}
+
+	getRestDBDirect() {
+		return restDBDirect;
 	}
 
 	on(eventName, callBack) {
@@ -84,41 +100,59 @@ class AnnuitCœptis {
 			console.error('Data cannot be created until app initializes.', this.status);
 			return new Promise((r,a) => {});
 		}
+		const receiveCreatedData = (createdData) => {
+			console.log('Created node ', createdData, ' using data ', data, ' with id ', createdData.id);
+			const { reRenderCallback = () => {} } = this;
+			this.data.push(createdData);
+			reRenderCallback();
+			return createdData;
+		};
+
 		const newData = this.conceiveData(data);
-		const nodeClass = this.getRestDB().nodes;
-		const newNode = new nodeClass({ data: newData, silo_id: 0 });
-		const promise = new Promise(
-			(resolve, reject) => newNode.save(
-				(err, node) => {
-					if (node._id) {
-						const {
-							_id, _created
-						} = node;
-						const {
-							_changed, _changedby, _createdby, _keywords, _tags, _version,
-							date, id,
-							...nodeData
-						} = node.data;
-						const newNodeDataReturned = {
-							id: _id,
-							date: _created,
-							creator: 'createData()',
-							...nodeData
-						};
+		var promise = undefined;
 
-						console.log('created node ', newNodeDataReturned, ' using data ', node, ' with id ', _id);
+		if (dbType === dbTypeConstants.DB_TYPE_REALTIME) {
+			console.log('createData dbtype ' + dbType);
+			const nodeClass = this.getRestDB().nodes;
+			const newNode = new nodeClass({ data: newData, silo_id: 0 });
+			promise = new Promise(
+				(resolve, reject) => newNode.save(
+					(err, node) => {
+						if (node._id) {
+							const {
+								_id, _created
+							} = node;
+							const {
+								_changed, _changedby, _createdby, _keywords, _tags, _version,
+								date, id,
+								...nodeData
+							} = node.data;
+							const createdData = {
+								id: _id,
+								date: _created,
+								creator: 'createData()',
+								...nodeData
+							};
 
-						const { reRenderCallback = () => {} } = this;
-						this.data.push(newNodeDataReturned);
-						resolve(newNodeDataReturned);
-						reRenderCallback();
-					} else {
-						console.error('Error creating data ', node);
-						reject(node);
+							receiveCreatedData(createdData);
+							resolve(createdData);
+						} else {
+							console.error('Error creating data ', node);
+							reject(node);
+						}
 					}
-				}
-			)
-		);
+				)
+			);
+		} else if (dbType === dbTypeConstants.DB_TYPE_AXIOS) {
+			console.log('createData dbtype ' + dbType);
+			promise = restDBDirect
+				.createNode(newData)
+				.then(receiveCreatedData)
+				.then((x) => { console.log('ahem ', x); return x; })
+				.then((x) => { console.log('ahemxx ', x); return x; });
+		} else {
+			console.error('Unsupported database type ', dbType);
+		}
 
 		return promise;
 	}
@@ -131,49 +165,66 @@ class AnnuitCœptis {
 	}
 
 	loadData() {
-		const nodeClass = this.getRestDB().nodes;
 		this.status.dataLoaded = false;
 		this.status.dataLoading = true;
 		console.log('Loading Data', this);
 		const { reRenderCallback = () => {} } = this;
 
-		return new Promise(
-			(resolve, reject) => {
-				nodeClass.find({}, {},
-					(err, nodes) => {
-						if (!err) {
-							this.data = nodes.map(
-								data => {
-									const {
-										_changed, _changedby, _created, _createdby, _keywords, _tags, _version, _id,
-										...nodeData
-									} = data;
+		const receiveData = (nodes) => {
+			console.log('got nodes ', nodes);
+			this.status.dataLoaded = true;
+			this.status.dataLoading = false;
+			this.reRenderCallback();
+			console.log(`Loaded ${nodes.length} nodes from the server.`);
+			return nodes;
+		};
 
-									const newData = {
-										id: _id,
-										date: _created,
-										creator: 'loadData()',
-										...nodeData.data
-									};
+		if (dbType === dbTypeConstants.DB_TYPE_REALTIME) {
+			const nodeClass = this.getRestDB().nodes;
 
-									return newData;
-								}
-							);
-							this.status.dataLoaded = true;
-							this.status.dataLoading = false;
-							this.reRenderCallback();
-							console.log(`Loaded ${nodes.length} nodes from the server.`);
-							resolve();
-						} else {
-							this.status.dataLoaded = false;
-							this.status.dataLoading = false;
-							console.error('DB error ', err);
-							reject();
+			return new Promise(
+				(resolve, reject) => {
+					nodeClass.find({}, {},
+						(err, nodes) => {
+							if (!err) {
+								this.data = nodes.map(
+									data => {
+										const {
+											_changed, _changedby, _created, _createdby, _keywords, _tags, _version, _id,
+											...nodeData
+										} = data;
+
+										const newData = {
+											id: _id,
+											date: _created,
+											creator: 'loadData()',
+											...nodeData.data
+										};
+
+										return newData;
+									}
+								);
+								receiveData(data);
+								resolve();
+							} else {
+								this.status.dataLoaded = false;
+								this.status.dataLoading = false;
+								console.error('DB error ', err);
+								reject();
+							}
 						}
-					}
-				);
-			}
-		);
+					);
+				}
+			);
+		} else if (dbType === dbTypeConstants.DB_TYPE_AXIOS) {
+			return restDBDirect
+				.getNodes()
+				.then((nodes) => {
+					this.data = nodes;
+					return nodes;
+				})
+				.then(receiveData);
+		}
 	}
 
 	setReRenderCallback(cb) {
@@ -215,7 +266,9 @@ class AnnuitCœptis {
 	}
 
 	setWindow(window) {
+		console.log('x');
 		if (window) {
+		console.log('d');
 			this.window = window;
 			window.annuitCœptis = this;
 			this.status.hasWinRef = true;

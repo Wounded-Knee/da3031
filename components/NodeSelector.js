@@ -15,6 +15,7 @@ export default class NodeSelector extends React.Component {
 	}
 
 	handleChange = selectedOption => {
+		console.log('Handling change', selectedOption);
 		const { onSelect = () => {} } = this.props;
 		const { value: node } = selectedOption;
 		this.setState({ selectedOption: null });
@@ -29,18 +30,25 @@ export default class NodeSelector extends React.Component {
 		console.log('Wait a moment...');
 		createNode(txt)
 			.then(
-				(newNode) => {
-					console.log('Creation complete, here is the new node: ', newNode);
+				(newNode, x, y, z) => {
+					console.log('Creation complete, here is the new node: ', newNode,x,y,z);
 					console.groupEnd();
 		      		this.setState({
 						isLoading: false,
 						options: [
-							...this.state.options,
+							...this.state.options || [],
 							newNode
 						],
 						selectedOption: newNode
 					});
-					if (selectOnCreate) this.handleChange( this.nodeToOption(newNode) );
+
+					if (selectOnCreate) {
+						this.handleChange(
+							this.nodeToOption(
+								newNode
+							)
+						);
+					}
 				}
 			)
 			.catch(
@@ -60,7 +68,7 @@ export default class NodeSelector extends React.Component {
 		const { selectedOption, options } = this.state;
 		const { nodeOptions } = this.props;
 		const newOptions = nodeOptions
-			? this.props.nodeOptions.map( this.nodeToOption )
+			? nodeOptions.map( this.nodeToOption )
 			: [];
 
 		return (

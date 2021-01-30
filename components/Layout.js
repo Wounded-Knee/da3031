@@ -8,7 +8,7 @@ const Layout = props => (
 	<Consumer>
 		{
 			({ annuitCœptis, rc }) => {
-				const className = `state${ (rc % 4) + 1 }`;
+				const className = false ? `state${ (rc % 4) + 1 }` : 'state2';
 				return (
 					<div className={ styles.container + ' ' + className }>
 						<Head>
