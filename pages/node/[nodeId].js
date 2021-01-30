@@ -17,35 +17,6 @@ export default function NodeView() {
 
 					return (
 						<Layout title="Node View">
-							<header>
-								<span onClick={ annuitCœptis.reRenderCallback.bind(annuitCœptis) }>R{ rc }</span>
-								<span>N{ annuitCœptis.data.length }</span>
-
-								{
-									Object.keys(annuitCœptis.status).map(
-										(statusAttr) => annuitCœptis.status[statusAttr] ? (
-											<span
-												key={ statusAttr }
-												className={ annuitCœptis.status[statusAttr] ? 'true' : 'false' }
-											>
-												{ statusAttr }
-											</span>
-										) : null
-									)
-								}
-
-								{ annuitCœptis.getAvatars().map(
-									avatar => <span
-										onClick={ annuitCœptis.setAvatar.bind(annuitCœptis, avatar) }
-										className={ activeAvatar === avatar ? 'active' : '' }
-									>{ avatar.text }</span>
-								) }
-							</header>
-
-							{ annuitCœptis.isInitialized() ? (
-								<NodeSelector createNode={ (txt) => annuitCœptis.createData({ text: txt }) } />
-							) : null }
-
 							{
 								annuitCœptis.status.dataLoading
 									? (
@@ -57,16 +28,6 @@ export default function NodeView() {
 													{ node
 														? <Node node={ node } />
 														: <p>{ `Node #${nodeId} not found.` }</p>
-													}
-													{
-														annuitCœptis.getOrphans().filter(
-															(orphan) => orphan.id !== nodeId && orphan.relationType_id === undefined
-														).map(
-															(orphan) => <Node
-																key={ orphan.id }
-																node={ orphan }
-															/>
-														)
 													}
 												</ol>
 											) : (

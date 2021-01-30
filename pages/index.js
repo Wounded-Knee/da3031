@@ -2,26 +2,43 @@ import Head from 'next/head'
 import Link from 'next/link'
 import styles from '../styles/Home.module.css'
 import Layout from '../components/Layout';
+import { Consumer } from '../classes/Provider';
 
 export default function Home(props) {
-	return (
-		<Layout { ...props }>
-			<h1 className={styles.title}>
-				DA30<a href="#">31</a>
-			</h1>
+  return (
+    <Consumer>
+      {
+        ({ annuitCœptis, router, rc }) => {
+          const firstNode = annuitCœptis.getOrphans()[0];
 
-			<p className={styles.description}>
-				Human Communication
-			</p>
+          return (
+        		<Layout { ...props }>
+        			<h1 className={styles.title}>
+        				DA30<a href="#">31</a>
+        			</h1>
 
-			<div className={styles.grid}>
-				<Link href="/node/1">
-					<a className={styles.card}>
-						<h3>Begin Communicating</h3>
-						<p>...</p>
-					</a>
-				</Link>
-			</div>
-		</Layout>
+        			<p className={styles.description}>
+        				Human Communication
+        			</p>
+
+        			<div className={styles.grid}>
+                {
+                  annuitCœptis.getOrphans().filter(
+                    (orphan) => orphan.relationType_id === undefined
+                  ).map(
+                    (orphan) => <Link key={ orphan.id } href={ `/node/${orphan.id}` }>
+                        <a className={styles.card}>
+                          <h3>{ orphan.text }</h3>
+                          <p>Begin Communicating Here</p>
+                        </a>
+                      </Link>
+                  )
+                }
+        			</div>
+        		</Layout>
+          );
+        }
+      }
+    </Consumer>
 	)
 };
