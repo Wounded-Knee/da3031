@@ -104,8 +104,9 @@ const Relationship = {
 					relationType_id: relationshipType.id,
 					relatives: relatives.map( relative => relative.id )
 				}).then(
-					() => {
+					(res) => {
 						console.groupEnd();
+						return res;
 					}
 				);
 			}
@@ -166,7 +167,7 @@ const Relationship = {
 											.link(relationshipType, [ parentNode, targetNode ])
 											.then((res) => {
 												console.log(`${parentNode.text}(#${parentNode.id}) is now ${relationshipType.titles[0].s} of ${targetNode.text}(#${targetNode.id})`);
-												return res;
+												return parentNode;
 											})
 											.catch((err) => {
 												console.error(`Relationship link failed: ${parentNode.text}(#${parentNode.id}) as ${relationshipType.titles[0].s} of ${targetNode.text}(#${targetNode.id})`);

@@ -8,8 +8,9 @@ const Layout = props => (
 	<Consumer>
 		{
 			({ annuitCœptis, rc }) => {
+				const className = `state${ (rc % 4) + 1 }`;
 				return (
-					<div className={styles.container}>
+					<div className={ styles.container + ' ' + className }>
 						<Head>
 							<title>DA3031: { props.title || "Human Communication" }</title>
 							<link rel="icon" href="/favicon.ico" />

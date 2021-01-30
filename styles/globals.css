@@ -84,11 +84,31 @@ main h1,
 header .logo {
   color: #0070f3;
   font-weight: bold;
-  background: url(https://media4.giphy.com/media/1zhHiGwQiu2CaGj1uE/giphy.gif) no-repeat;
+  background: url(/andthis.gif) no-repeat;
   background-size: cover;
   background-position: center;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.state1 main h1,
+.state1 header .logo {
+  background-image: url(/thistoo.gif);
+}
+
+.state2 main h1,
+.state2 header .logo {
+  background-image: url(/rainbow.gif);
+}
+
+.state3 main h1,
+.state3 header .logo {
+  background-image: url(/ripples.gif);
+}
+
+.state4 main h1,
+.state4 header .logo {
+  background-image: url(/crystalline.gif);
 }
 
 @import url(./jsonview.css);

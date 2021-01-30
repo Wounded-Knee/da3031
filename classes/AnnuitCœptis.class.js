@@ -184,6 +184,12 @@ class AnnuitCœptis {
 		if (!this.restdb) {
 			this.restdb = restDB;
 
+			this.getRestDB().on('DISCONNECT', () => {
+				this.ee.emit('dbDisconnect');
+				this.status.dbConnected = false;
+				this.reRenderCallback();
+			});
+
 			this.getRestDB().on('POST', (error, eventData) => {
 				const {
 					_version, _id,
