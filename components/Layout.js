@@ -74,7 +74,7 @@ const Layout = props => (
 						<footer className={styles.footer}>
 							&copy;2021
 
-							<span class="google">
+							<span className="google">
 								<em>
 									N
 									<em>

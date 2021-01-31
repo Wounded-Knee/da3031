@@ -7,6 +7,7 @@ import Navigation from './Navigation.mixin';
 import config from '../config';
 import EventEmitter from 'events';
 import restDBDirect from './RestDBDirect.class';
+import debounce from 'debounce';
 const {
 	runStartupScript,
 	dbType,
@@ -27,7 +28,10 @@ class AnnuitCœptis {
 		};
 		this.restdb = undefined;
 
-		this.once('dbConnect', this.loadData.bind(this));
+		this.once('dbConnect', this.loadData.bind(this, { freshest: true } ));
+		this.once('dbConnect', () => {
+			restDBDirect.onReceiveNodes(this.assimilateNodes.bind(this));
+		});
 
 		if (dbType === dbTypeConstants.DB_TYPE_AXIOS) {
 			this.ee.emit('dbConnect');
@@ -159,7 +163,14 @@ class AnnuitCœptis {
 
 	assimilateNodes(nodes) {
 		nodes.forEach((node) => {
-			this.data.push(node);
+			if (!this.getDataById(node.id)) {
+				this.data.push(node);
+				this.reRenderCallback();
+			} else {
+				console.warn(
+					`Resisted assimilation of ${node.text} on account of the ID is already in the local cache.`, node
+				);
+			}
 		});
 	}
 
@@ -226,7 +237,7 @@ class AnnuitCœptis {
 	}
 
 	setReRenderCallback(cb) {
-		this.reRenderCallback = cb;
+		this.reRenderCallback = debounce(cb, 1000);
 	}
 
 	setRestDB(restDB) {
