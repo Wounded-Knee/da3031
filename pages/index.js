@@ -29,7 +29,7 @@ export default function Home(props) {
                   <NodeSelector
                     selectOnCreate={ true }
                     placeholder="Say something!"
-                    inputOnly={ true }
+                    inputOnly={ false }
                     onSelect={ annuitCœptis.navigate.bind(annuitCœptis, undefined) }
                     createNode={
                       (text) => annuitCœptis.createData({
