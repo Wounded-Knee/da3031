@@ -28,11 +28,13 @@ export default function Home(props) {
                 <>
                   <NodeSelector
                     selectOnCreate={ true }
+                    placeholder="Say something!"
+                    inputOnly={ true }
                     onSelect={ annuitCœptis.navigate.bind(annuitCœptis, undefined) }
                     createNode={
                       (text) => annuitCœptis.createData({
                         text
-                      }).then((x) => { console.log('eeg', x); return x; })
+                      })
                     }
                   />
 

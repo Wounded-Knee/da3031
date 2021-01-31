@@ -15,7 +15,6 @@ export default class NodeSelector extends React.Component {
 	}
 
 	handleChange = selectedOption => {
-		console.log('Handling change', selectedOption);
 		const { onSelect = () => {} } = this.props;
 		const { value: node } = selectedOption;
 		this.setState({ selectedOption: null });
@@ -66,7 +65,7 @@ export default class NodeSelector extends React.Component {
 
 	render() {
 		const { selectedOption, options } = this.state;
-		const { nodeOptions } = this.props;
+		const { nodeOptions, placeholder, inputOnly } = this.props;
 		const newOptions = nodeOptions
 			? nodeOptions.map( this.nodeToOption )
 			: [];
@@ -74,9 +73,11 @@ export default class NodeSelector extends React.Component {
 		return (
 			<Creatable
 				value={ null }
+				menuIsOpen={ inputOnly ? false : undefined }
 				onChange={ this.handleChange }
 				onCreateOption={ this.onCreateOption }
 				options={ newOptions }
+				placeholder={ placeholder }
 				isSearchable
 				autoFocus
 			/>

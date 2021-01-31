@@ -27,12 +27,9 @@ class AnnuitCœptis {
 		};
 		this.restdb = undefined;
 
-		console.log('AnnuitCœptis constructor');
-
 		this.once('dbConnect', this.loadData.bind(this));
 
 		if (dbType === dbTypeConstants.DB_TYPE_AXIOS) {
-			console.log('emit dbcon');
 			this.ee.emit('dbConnect');
 		}
 	}
@@ -112,7 +109,6 @@ class AnnuitCœptis {
 		var promise = undefined;
 
 		if (dbType === dbTypeConstants.DB_TYPE_REALTIME) {
-			console.log('createData dbtype ' + dbType);
 			const nodeClass = this.getRestDB().nodes;
 			const newNode = new nodeClass({ data: newData, silo_id: 0 });
 			promise = new Promise(
@@ -144,12 +140,9 @@ class AnnuitCœptis {
 				)
 			);
 		} else if (dbType === dbTypeConstants.DB_TYPE_AXIOS) {
-			console.log('createData dbtype ' + dbType);
 			promise = restDBDirect
 				.createNode(newData)
-				.then(receiveCreatedData)
-				.then((x) => { console.log('ahem ', x); return x; })
-				.then((x) => { console.log('ahemxx ', x); return x; });
+				.then(receiveCreatedData);
 		} else {
 			console.error('Unsupported database type ', dbType);
 		}
@@ -171,7 +164,6 @@ class AnnuitCœptis {
 		const { reRenderCallback = () => {} } = this;
 
 		const receiveData = (nodes) => {
-			console.log('got nodes ', nodes);
 			this.status.dataLoaded = true;
 			this.status.dataLoading = false;
 			this.reRenderCallback();
@@ -266,9 +258,7 @@ class AnnuitCœptis {
 	}
 
 	setWindow(window) {
-		console.log('x');
 		if (window) {
-		console.log('d');
 			this.window = window;
 			window.annuitCœptis = this;
 			this.status.hasWinRef = true;

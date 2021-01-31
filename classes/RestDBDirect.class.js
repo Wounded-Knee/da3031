@@ -42,7 +42,6 @@ const restDBDirect = (new (class RestDBDirect {
 		return axiosInstance
 			.get()
 			.then((response) => {
-				console.log('getNodes() ', response);
 				return response.data.map(
 					(node) => {
 						const {

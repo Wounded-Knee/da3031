@@ -1509,7 +1509,6 @@ const RestDB = () => {
 		const restDB = new restdb(apikey, {realtime: true, logging: true});
 		annuitCœptis.setRestDB(restDB);
 */
-console.log('setting window');
 		annuitCœptis.setWindow(window);
   	}
   )
