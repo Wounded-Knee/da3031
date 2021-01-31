@@ -4,6 +4,11 @@ import Link from 'next/link';
 import { annuitCœptis } from '../classes/AnnuitCœptis.class';
 import NodeSelector from './NodeSelector';
 import { useRouter } from 'next/router';
+import config from '../config';
+
+const {
+	devMode
+} = config;
 
 const
 	RT_CHILD_OF = 0,
@@ -46,12 +51,13 @@ export default function Node({ node, context, nodeId }) {
 							})
 						}
 					/>
-					<NodeRelationList
+
+					{ devMode ? <NodeRelationList
 						rootNode={ node }
 						blacklist={
 							annuitCœptis.getRelationshipTypeById(1).titles[1]
 						}
-					/>
+					/> : null }
 				</> }
 			</li>
 		</>

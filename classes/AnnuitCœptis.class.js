@@ -100,7 +100,7 @@ class AnnuitCœptis {
 		const receiveCreatedData = (createdData) => {
 			console.log('Created node ', createdData, ' using data ', data, ' with id ', createdData.id);
 			const { reRenderCallback = () => {} } = this;
-			this.data.push(createdData);
+			this.assimilateNodes([createdData]);
 			reRenderCallback();
 			return createdData;
 		};
@@ -155,6 +155,12 @@ class AnnuitCœptis {
 			...data,
 			date: new Date()
 		};
+	}
+
+	assimilateNodes(nodes) {
+		nodes.forEach((node) => {
+			this.data.push(node);
+		});
 	}
 
 	loadData() {
@@ -212,7 +218,7 @@ class AnnuitCœptis {
 			return restDBDirect
 				.getNodes()
 				.then((nodes) => {
-					this.data = nodes;
+					this.assimilateNodes(nodes);
 					return nodes;
 				})
 				.then(receiveData);

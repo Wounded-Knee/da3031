@@ -4,8 +4,13 @@ import styles from '../../styles/NodeView.module.css'
 import Layout from '../../components/Layout';
 import Node from '../../components/Node';
 import NodeSelector from '../../components/NodeSelector';
+import config from '../../config';
 import { JsonView } from 'json-view-for-react';
 import { Consumer } from '../../classes/Provider';
+
+const {
+	devMode
+} = config;
 
 export default function NodeView() {
 	return (
@@ -32,10 +37,10 @@ export default function NodeView() {
 														}
 													</ol>
 
-										 			<JsonView
+										 			{ devMode ? <JsonView
 										 				obj={ annuitCœptis.getData() }
 										 				showLineNumbers
-										 			/>
+										 			/> : null }
 										 		</>
 											) : (
 												"Loading error."
