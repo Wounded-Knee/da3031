@@ -103,7 +103,7 @@ main h1,
 header .logo {
   color: #0070f3;
   font-weight: bold;
-  background: url(/andthis.gif) no-repeat;
+  background: url(/rainbowPixels.gif) no-repeat;
   background-size: cover;
   background-position: center;
   -webkit-background-clip: text;
@@ -128,6 +128,11 @@ header .logo {
 .state4 main h1,
 .state4 header .logo {
   background-image: url(/crystalline.gif);
+}
+
+.state4 main h1,
+.state4 header .logo {
+  background-image: url(/andthis.gif);
 }
 
 @import url(./jsonview.css);

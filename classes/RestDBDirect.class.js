@@ -1,5 +1,7 @@
 import config from '../config';
 import axios from 'axios';
+import * as Promise from "bluebird";
+
 const {
 	restdbUrl,
 	restdbTimeout,
@@ -18,48 +20,131 @@ const axiosInstance = axios.create({
 	withCredentials: false,
 });
 
+Promise.config({
+	cancellation: true
+});
+
 const restDBDirect = (new (class RestDBDirect {
 	constructor() {
 		this.freshestNode = undefined;
+		this.connections = [];
+		this.connectionPromise = undefined;
 		this.callbacks = {
-			onReceiveNodes: []
+			receiveNodes: [],
+			networkStart: [],
+			networkEnd: [],
+			networkError: [],
 		};
-		setInterval(
-			this.getNodes.bind(this, { freshest: true} ),
-			pollInterval
-		);
+
+		this.poll();
+	}
+
+	poll() {
+		this
+			.getNodes({freshest: true})
+			.then(() => {
+				setTimeout(
+					this.poll.bind(this),
+					pollInterval
+				);
+			})
+	}
+
+	/* Events
+	**********/
+	onNetworkStart(callback) {
+		return this.on('networkStart', callback);
+	}
+
+	onNetworkEnd(callback) {
+		return this.on('networkEnd', callback);
 	}
 
 	onReceiveNodes(callback) {
-		this.callbacks.onReceiveNodes.push(callback);
+		return this.on('receiveNodes', callback);
 	}
 
-	registerNode(node) {
-		if (!this.freshestNode || node.date > this.freshestNode.date) this.freshestNode = node;
-		this.callbacks.onReceiveNodes.map(
-			(callback) => callback([node])
+	fire(event, args) {
+		if (args instanceof Array && args.length > 3) {
+			console.warn(`${args.length} arguments passed to fire(), did you forget to pass args as an array?`);
+		}
+		console.log('RestDBDirect Event: ', event, args);
+		if (typeof(this.callbacks[event]) !== 'undefined') {
+			this.callbacks[event].map(
+				(callback) => {
+					callback.apply(null, args);
+				}
+			);
+		}
+	}
+
+	on(event, callback) {
+		this.callbacks[event].push(callback);
+		return this;
+	}
+
+	registerNodes(nodes) {
+		nodes.forEach(
+			(node) => {
+				this.freshestNode = (
+					!this.freshestNode ||
+					node.date > this.freshestNode.date
+				)
+					? node
+					: this.freshestNode
+			}
 		);
-		return node;
+
+		if (!(nodes instanceof Array)) {
+			console.error('Bad nodes ', nodes);
+		} else {
+			this.fire('receiveNodes', [nodes]);
+		}
+		return nodes;
+	}
+
+	registerConnection(connection) {
+		this.connections.push(connection);
+		if (this.connectionPromise) {
+			this.connectionPromise.cancel();
+		} else {
+			this.fire('networkStart', [this.connections]);
+		}
+		this.connectionPromise = Promise
+			.all(this.connections)
+			.then(() => {
+				this.connectionPromise = undefined;
+				this.connections = [];
+				this.fire('networkEnd');
+			})
+			.catch(() => {
+				this.fire('networkEnd');
+				this.fire('networkError');
+			});
+
+		return connection;
 	}
 
 	createNode(node) {
-		return axiosInstance
-			.post('nodes', node)
-			.then((response) => {
-				const {
-					_changed, _changedby, _createdby, _keywords, _tags, _version, _id, _created,
-					date, id,
-					...nodeData
-				} = response.data;
-				const createdData = {
-					id: _id,
-					date: new Date(_created),
-					creator: 'createData()',
-					...nodeData
-				};
-				console.log('restDBDirect.createNode() returns ', createdData);
-				return this.registerNode(createdData);
-			});
+		return this.registerConnection(
+			axiosInstance
+				.post('nodes', node)
+				.then((response) => {
+					const {
+						_changed, _changedby, _createdby, _keywords, _tags, _version, _id, _created,
+						date, id,
+						...nodeData
+					} = response.data;
+					const createdData = {
+						id: _id,
+						date: new Date(_created),
+						creator: 'createData()',
+						...nodeData
+					};
+					console.log('restDBDirect.createNode() returns ', createdData);
+					return this.registerNodes([createdData]);
+				})
+		);
 	}
 
 	getNodes({ freshest }={}) {
@@ -71,24 +156,28 @@ const restDBDirect = (new (class RestDBDirect {
 			}
 		} : undefined;
 
-		return axiosInstance
-			.get('nodes' + (query ? `?q=${JSON.stringify(query)}` : ''))
-			.then((response) => {
-				return response.data.map(
+		return this.registerConnection(
+			axiosInstance
+				.get('nodes' + (query ? `?q=${JSON.stringify(query)}` : ''))
+				.then((response) => response.data.map(
 					(node) => {
 						const {
 							_id, date,
 							...nodeData
 						} = node;
 
-						return this.registerNode({
+						return {
 							id: _id,
 							date: new Date(date),
 							...nodeData
-						});
+						};
 					}
-				);
-			});
+				))
+				.then(this.registerNodes.bind(this))
+				.catch((err) => {
+					console.error('RestDBDirect.getNodes(): ', err);
+				})
+		);
 	}
 })());
 

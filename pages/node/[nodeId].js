@@ -23,7 +23,7 @@ export default function NodeView() {
 					return (
 						<Layout title="Node View">
 							{
-								annuitCœptis.status.dataLoading
+								!annuitCœptis.status.dataLoaded
 									? (
 										<div className="loading">Loading...</div>
 									) : (

@@ -13,7 +13,7 @@ const Layout = props => (
 	<Consumer>
 		{
 			({ annuitCœptis, rc }) => {
-				const className = false ? `state${ (rc % 4) + 1 }` : 'state2';
+				const className = annuitCœptis.status.dataLoading ? `state5` : 'state2';
 				return (
 					<div className={ styles.container + ' ' + className }>
 						<Head>

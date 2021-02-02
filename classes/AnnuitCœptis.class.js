@@ -8,34 +8,58 @@ import config from '../config';
 import EventEmitter from 'events';
 import restDBDirect from './RestDBDirect.class';
 import debounce from 'debounce';
+import jscookie from 'js-cookie';
 const {
 	runStartupScript,
-	dbType,
-	dbTypeConstants,
 } = config;
 const mixins = [User, Avatar, Relationship, Navigation];
+
+console.log(jscookie);
 
 class AnnuitCœptis {
 	constructor(mixins) {
 		this.data = [];
+		this.window = undefined;
 		this.ee = new EventEmitter();
 		this.setReRenderCallback( () => {} );
 		this.status = {
 			dataLoading: false,
 			dataLoaded: false,
-			dbConnected: (dbType === dbTypeConstants.DB_TYPE_REALTIME) ? false : true,
+			dbConnected: false,
 			hasWinRef: false,
 		};
 		this.restdb = undefined;
 
-		this.once('dbConnect', this.loadData.bind(this, { freshest: true } ));
 		this.once('dbConnect', () => {
-			restDBDirect.onReceiveNodes(this.assimilateNodes.bind(this));
+			this.status.dbConnected = true;
+			restDBDirect
+				.onReceiveNodes(
+					this.assimilateNodes.bind(this)
+				)
+				.onNetworkStart(
+					() => {
+						this.status.dataLoading = true;
+						this.reRenderCallback();
+					}
+				)
+				.onNetworkEnd(
+					() => {
+						this.status.dataLoading = false;
+						this.reRenderCallback();
+					}
+				);
+			this.loadData({ freshest: false });
 		});
 
-		if (dbType === dbTypeConstants.DB_TYPE_AXIOS) {
-			this.ee.emit('dbConnect');
-		}
+		this.ee.emit('dbConnect');
+	}
+
+	getLocalData() {
+		return JSON.parse(this.window.localStorage.getItem('d3'));
+	}
+
+	setLocalData(data) {
+		this.window.localStorage.setItem('d3', JSON.stringify(data));
 	}
 
 	getRestDBDirect() {
@@ -60,7 +84,6 @@ class AnnuitCœptis {
 
 		return (
 			dataLoaded &&
-			!dataLoading &&
 			dbConnected &&
 			hasWinRef
 		);
@@ -110,46 +133,9 @@ class AnnuitCœptis {
 		};
 
 		const newData = this.conceiveData(data);
-		var promise = undefined;
-
-		if (dbType === dbTypeConstants.DB_TYPE_REALTIME) {
-			const nodeClass = this.getRestDB().nodes;
-			const newNode = new nodeClass({ data: newData, silo_id: 0 });
-			promise = new Promise(
-				(resolve, reject) => newNode.save(
-					(err, node) => {
-						if (node._id) {
-							const {
-								_id, _created
-							} = node;
-							const {
-								_changed, _changedby, _createdby, _keywords, _tags, _version,
-								date, id,
-								...nodeData
-							} = node.data;
-							const createdData = {
-								id: _id,
-								date: _created,
-								creator: 'createData()',
-								...nodeData
-							};
-
-							receiveCreatedData(createdData);
-							resolve(createdData);
-						} else {
-							console.error('Error creating data ', node);
-							reject(node);
-						}
-					}
-				)
-			);
-		} else if (dbType === dbTypeConstants.DB_TYPE_AXIOS) {
-			promise = restDBDirect
+		const promise = restDBDirect
 				.createNode(newData)
 				.then(receiveCreatedData);
-		} else {
-			console.error('Unsupported database type ', dbType);
-		}
 
 		return promise;
 	}
@@ -188,52 +174,14 @@ class AnnuitCœptis {
 			return nodes;
 		};
 
-		if (dbType === dbTypeConstants.DB_TYPE_REALTIME) {
-			const nodeClass = this.getRestDB().nodes;
-
-			return new Promise(
-				(resolve, reject) => {
-					nodeClass.find({}, {},
-						(err, nodes) => {
-							if (!err) {
-								this.data = nodes.map(
-									data => {
-										const {
-											_changed, _changedby, _created, _createdby, _keywords, _tags, _version, _id,
-											...nodeData
-										} = data;
-
-										const newData = {
-											id: _id,
-											date: _created,
-											creator: 'loadData()',
-											...nodeData.data
-										};
-
-										return newData;
-									}
-								);
-								receiveData(data);
-								resolve();
-							} else {
-								this.status.dataLoaded = false;
-								this.status.dataLoading = false;
-								console.error('DB error ', err);
-								reject();
-							}
-						}
-					);
-				}
-			);
-		} else if (dbType === dbTypeConstants.DB_TYPE_AXIOS) {
-			return restDBDirect
-				.getNodes()
-				.then((nodes) => {
-					this.assimilateNodes(nodes);
-					return nodes;
-				})
-				.then(receiveData);
-		}
+		return restDBDirect
+			.getNodes()
+			.then((nodes) => {
+				console.log('Assimilating nodes ', nodes);
+				this.assimilateNodes(nodes);
+				return nodes;
+			})
+			.then(receiveData);
 	}
 
 	setReRenderCallback(cb) {
@@ -279,6 +227,7 @@ class AnnuitCœptis {
 			this.window = window;
 			window.annuitCœptis = this;
 			this.status.hasWinRef = true;
+			this.ee.emit('gotWindow', window);
 		}
 	}
 
