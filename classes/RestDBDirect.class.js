@@ -108,6 +108,7 @@ const restDBDirect = (new (class RestDBDirect {
 		if (this.connectionPromise) {
 			this.connectionPromise.cancel();
 		} else {
+			console.groupCollapsed('RestDBDirect: Network Fetch');
 			this.fire('networkStart', [this.connections]);
 		}
 		this.connectionPromise = Promise
@@ -116,10 +117,12 @@ const restDBDirect = (new (class RestDBDirect {
 				this.connectionPromise = undefined;
 				this.connections = [];
 				this.fire('networkEnd');
+				console.groupEnd();
 			})
 			.catch(() => {
 				this.fire('networkEnd');
 				this.fire('networkError');
+				console.groupEnd();
 			});
 
 		return connection;
