@@ -1,24 +1,18 @@
-import NodeType from './NodeType.mixin';
-import Author from './Author.mixin';
-import Relationship from './Relationship.mixin';
-import User from './User.mixin';
-import Avatar from './Avatar.mixin';
-import Navigation from './Navigation.mixin';
 import config from '../config';
 import EventEmitter from 'events';
 import restDBDirect from './RestDBDirect.class';
 import debounce from 'debounce';
 import jscookie from 'js-cookie';
 import discordOauth2 from './DiscordOauth2.class';
+import dynamic from 'next/dynamic';
 const {
 	runStartupScript,
+	nodeTypes,
+	mixins,
 } = config;
-const mixins = [User, Avatar, Relationship, Navigation];
-
-console.log(jscookie);
 
 class AnnuitCœptis {
-	constructor(mixins) {
+	constructor() {
 		this.data = [];
 		this.window = undefined;
 		this.ee = new EventEmitter();
@@ -71,6 +65,14 @@ class AnnuitCœptis {
 		});
 
 		this.ee.emit('dbConnect');
+	}
+
+	getNodeTypes() {
+		return [];
+	}
+
+	getRendererByNodeType(nodeType) {
+		return dynamic(() => import('../nodeTypes/'+nodeType+'/Node'));
 	}
 
 	getLocalData() {
@@ -140,7 +142,7 @@ class AnnuitCœptis {
 
 	createData(data) {
 		if (!this.isInitialized()) {
-			console.error('Data cannot be created until app initializes.', this.status);
+			console.error('Data cannot be created until app initializes.');
 			return new Promise((r,a) => {});
 		}
 		const receiveCreatedData = (createdData) => {
@@ -182,7 +184,6 @@ class AnnuitCœptis {
 	loadData() {
 		this.status.dataLoaded = false;
 		this.status.dataLoading = true;
-		console.log('Loading Data', this);
 		const { reRenderCallback = () => {} } = this;
 
 		const receiveData = (nodes) => {
@@ -196,7 +197,6 @@ class AnnuitCœptis {
 		return restDBDirect
 			.getNodes()
 			.then((nodes) => {
-				console.log('Assimilating nodes ', nodes);
 				this.assimilateNodes(nodes);
 				return nodes;
 			})
@@ -234,7 +234,7 @@ class AnnuitCœptis {
 					});
 					console.log('RestDB.RDE: Assimilated.', eventData);
 				} else {
-					console.log('RestDB.RDE: ID already exists locally, ignoring.', eventData);
+					console.log('RestDB.RDE: ID already exists locally, ignoring.', eventData.text);
 				}
 			});
 
@@ -267,8 +267,13 @@ for (var x=0, AnnuitCœptisII=AnnuitCœptis; x<mixins.length; x++) {
 	AnnuitCœptisII = (mixins[x].extend || function(y) { return y })(AnnuitCœptisII);
 }
 
+// Mix in nodeTypes
+for (var x=0; x<nodeTypes.length; x++) {
+	AnnuitCœptisII = (nodeTypes[x].extend || function(y) { return y })(AnnuitCœptisII);
+}
+
 // New instance
-const annuitCœptis = new AnnuitCœptisII(mixins);
+const annuitCœptis = new AnnuitCœptisII();
 
 if (runStartupScript) {
 	// Testing

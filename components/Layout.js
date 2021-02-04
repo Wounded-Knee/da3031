@@ -6,7 +6,8 @@ import { Consumer } from '../classes/Provider';
 import config from '../config';
 
 const {
-	devMode
+	devMode,
+	theme,
 } = config;
 
 const Layout = props => (
@@ -22,7 +23,7 @@ const Layout = props => (
 				);
 
 				return (
-					<div className={ styles.container + ' ' + className }>
+					<div className={ styles.container + ' ' + className + ' ' + 'theme'+theme }>
 						<Head>
 							<title>{ props.title || "Human Communication" } D³</title>
 							<link rel="icon" href="/favicon.ico" />

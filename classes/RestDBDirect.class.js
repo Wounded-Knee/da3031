@@ -33,8 +33,6 @@ const restDBDirect = (new (class RestDBDirect {
 			networkError: [],
 			networkClear: [],
 		};
-
-		this.poll();
 	}
 
 	poll() {
@@ -66,7 +64,7 @@ const restDBDirect = (new (class RestDBDirect {
 		if (args instanceof Array && args.length > 3) {
 			console.warn(`${args.length} arguments passed to fire(), did you forget to pass args as an array?`);
 		}
-		console.log('RestDBDirect Event: ', event, args);
+		console.log('RestDBDirect Event: ', event);
 		if (typeof(this.callbacks[event]) !== 'undefined') {
 			this.callbacks[event].map(
 				(callback) => {
@@ -112,10 +110,8 @@ const restDBDirect = (new (class RestDBDirect {
 		this.connectionPromise = Promise
 			.all(this.connections)
 			.catch((err) => {
-				console.error('connectionPromise catch: ', err);
-				this.connections.forEach( c => console.log(c.isRejected()) );
 				this.fire('networkEnd');
-				this.fire('networkError', this.connections);
+				this.fire('networkError');
 				console.groupEnd();
 				const beforeCount = this.connections.length;
 				this.connections = this.connections.filter(
@@ -172,6 +168,10 @@ const restDBDirect = (new (class RestDBDirect {
 			axiosInstance
 				.get('nodes' + (query ? `?q=${JSON.stringify(query)}` : ''))
 				.catch((err) => {
+					if (!freshest) {
+						console.warn('Failed initial node load, retrying in 3s...');
+						setTimeout(this.getNodes.bind(this), 3000);
+					}
 					throw new Error(err);
 					return false;
 				})
@@ -190,6 +190,7 @@ const restDBDirect = (new (class RestDBDirect {
 					}
 				))
 				.then(this.registerNodes.bind(this))
+				.then(this.poll.bind(this))
 		);
 	}
 })());

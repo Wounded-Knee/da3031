@@ -1,16 +1,15 @@
-import Head from 'next/head'
 import Link from 'next/link'
 import styles from '../../styles/NodeView.module.css'
 import Layout from '../../components/Layout';
-import Node from '../../components/Node';
 import NodeSelector from '../../components/NodeSelector';
 import config from '../../config';
-import { JsonView } from 'json-view-for-react';
 import { Consumer } from '../../classes/Provider';
 
-const {
-	devMode
-} = config;
+const
+	RT_CHILD_OF = 0,
+	RT_AUTHOR_OF = 1,
+	RT_TRAVELER = 2
+;
 
 export default function NodeView() {
 	return (
@@ -18,7 +17,11 @@ export default function NodeView() {
 			{
 				({ annuitCœptis, router, rc }) => {
 					const nodeId = router ? router.query.nodeId : '';
-					const node = annuitCœptis.getDataById(nodeId);
+					const node = {
+						type: 'default',
+						...annuitCœptis.getDataById(nodeId),
+					};
+					const Node = annuitCœptis.getRendererByNodeType(node.type);
 
 					return (
 						<Layout title="Node View">
@@ -37,10 +40,20 @@ export default function NodeView() {
 														}
 													</ol>
 
-										 			{ devMode ? <JsonView
-										 				obj={ annuitCœptis.getData() }
-										 				showLineNumbers
-										 			/> : null }
+													<NodeSelector
+														nodeOptions={ node.getChildren() }
+														selectOnCreate
+														onSelect={ chosenNode => annuitCœptis.navigate(node, chosenNode) }
+														createNode={
+															(text) => annuitCœptis.createData({
+																text,
+																rel: {
+																	[ RT_AUTHOR_OF ]: [ annuitCœptis.getAvatar() ],
+																	[ RT_CHILD_OF ]: [ node ]
+																}
+															})
+														}
+													/>
 										 		</>
 											) : (
 												"Loading error."
