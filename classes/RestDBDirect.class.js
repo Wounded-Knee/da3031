@@ -1,5 +1,6 @@
 import config from '../config';
-
+global.Promise = require('bluebird');
+Promise.config({ cancellation: true });
 import axios from 'axios';
 
 const {
@@ -110,15 +111,17 @@ const restDBDirect = (new (class RestDBDirect {
 		}
 		this.connectionPromise = Promise
 			.all(this.connections)
-			.catch(() => {
+			.catch((err) => {
+				console.error('connectionPromise catch: ', err);
+				this.connections.forEach( c => console.log(c.isRejected()) );
 				this.fire('networkEnd');
 				this.fire('networkError', this.connections);
 				console.groupEnd();
 				const beforeCount = this.connections.length;
 				this.connections = this.connections.filter(
-					(connection) => !connection.isRejected()
+					(connection) => connection.isPending()
 				);
-				//console.log('Cleaned up ' + (beforeCount - this.connections.length) + ' rejected connections');
+				console.log('Cleaned up ' + (beforeCount - this.connections.length) + ' rejected connections');
 				return false;
 			})
 			.then((cont) => {
