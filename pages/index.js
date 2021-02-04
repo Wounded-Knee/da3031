@@ -3,7 +3,15 @@ import Link from 'next/link'
 import styles from '../styles/Home.module.css'
 import Layout from '../components/Layout';
 import NodeSelector from '../components/NodeSelector';
+import config from "../config";
+import discordOauth2 from '../classes/DiscordOauth2.class';
 import { Consumer } from '../classes/Provider';
+
+const {
+  clientId,
+  clientSecret,
+  redirectUri,
+} = config.discord;
 
 export default function Home(props) {
   return (
@@ -14,10 +22,15 @@ export default function Home(props) {
             (orphan) => orphan.relationType_id === undefined
           );
 
+
+
+// http://falken-7f87b281.localhost.run/?code=dZvAJO1GBemcmFtCz3i50zVHSp0GZq&state=15773059ghq9183habn
           return (
         		<Layout { ...props }>
         			<h1 className={styles.title}>
-                D<sup>3</sup>
+                <Link href={ discordOauth2.getOauth2Url() }>
+                  <a>D<sup>3</sup></a>
+                </Link>
         			</h1>
 
         			<p className={styles.description}>
@@ -51,7 +64,11 @@ export default function Home(props) {
                     }
             			</div>
                 </>
-              ) : <div className="loading">Loading...</div> }
+              ) : ( annuitCœptis.status.dbNetworkError
+                ? <div className="loading">Disconnected</div>
+                : <div className="loading">Loading...</div>
+              ) }
+
         		</Layout>
           );
         }

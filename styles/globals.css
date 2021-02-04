@@ -99,7 +99,7 @@ header .logo {
   font-size: 1.75em;
 }
 
-main h1,
+main h1 a,
 header .logo {
   color: #0070f3;
   font-weight: bold;
@@ -110,27 +110,27 @@ header .logo {
   -webkit-text-fill-color: transparent;
 }
 
-.state1 main h1,
+.state1 main h1 a,
 .state1 header .logo {
   background-image: url(/thistoo.gif);
 }
 
-.state2 main h1,
+.state2 main h1 a,
 .state2 header .logo {
   background-image: url(/rainbow.gif);
 }
 
-.state3 main h1,
+.state3 main h1 a,
 .state3 header .logo {
-  background-image: url(/ripples.gif);
+  background-image: url(/circuits.gif);
 }
 
-.state4 main h1,
+.state4 main h1 a,
 .state4 header .logo {
   background-image: url(/crystalline.gif);
 }
 
-.state4 main h1,
+.state4 main h1 a,
 .state4 header .logo {
   background-image: url(/andthis.gif);
 }

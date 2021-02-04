@@ -1,6 +1,6 @@
 import config from '../config';
+
 import axios from 'axios';
-import * as Promise from "bluebird";
 
 const {
 	restdbUrl,
@@ -20,10 +20,6 @@ const axiosInstance = axios.create({
 	withCredentials: false,
 });
 
-Promise.config({
-	cancellation: true
-});
-
 const restDBDirect = (new (class RestDBDirect {
 	constructor() {
 		this.freshestNode = undefined;
@@ -34,6 +30,7 @@ const restDBDirect = (new (class RestDBDirect {
 			networkStart: [],
 			networkEnd: [],
 			networkError: [],
+			networkClear: [],
 		};
 
 		this.poll();
@@ -42,7 +39,7 @@ const restDBDirect = (new (class RestDBDirect {
 	poll() {
 		this
 			.getNodes({freshest: true})
-			.then(() => {
+			.finally(() => {
 				setTimeout(
 					this.poll.bind(this),
 					pollInterval
@@ -113,16 +110,25 @@ const restDBDirect = (new (class RestDBDirect {
 		}
 		this.connectionPromise = Promise
 			.all(this.connections)
-			.then(() => {
-				this.connectionPromise = undefined;
-				this.connections = [];
-				this.fire('networkEnd');
-				console.groupEnd();
-			})
 			.catch(() => {
 				this.fire('networkEnd');
-				this.fire('networkError');
+				this.fire('networkError', this.connections);
 				console.groupEnd();
+				const beforeCount = this.connections.length;
+				this.connections = this.connections.filter(
+					(connection) => !connection.isRejected()
+				);
+				//console.log('Cleaned up ' + (beforeCount - this.connections.length) + ' rejected connections');
+				return false;
+			})
+			.then((cont) => {
+				if (cont) {
+					this.connectionPromise = undefined;
+					this.connections = [];
+					this.fire('networkEnd');
+					this.fire('networkClear');
+					console.groupEnd();
+				}
 			});
 
 		return connection;
@@ -162,6 +168,10 @@ const restDBDirect = (new (class RestDBDirect {
 		return this.registerConnection(
 			axiosInstance
 				.get('nodes' + (query ? `?q=${JSON.stringify(query)}` : ''))
+				.catch((err) => {
+					throw new Error(err);
+					return false;
+				})
 				.then((response) => response.data.map(
 					(node) => {
 						const {
@@ -177,9 +187,6 @@ const restDBDirect = (new (class RestDBDirect {
 					}
 				))
 				.then(this.registerNodes.bind(this))
-				.catch((err) => {
-					console.error('RestDBDirect.getNodes(): ', err);
-				})
 		);
 	}
 })());

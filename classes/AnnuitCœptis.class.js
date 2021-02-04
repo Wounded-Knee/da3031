@@ -9,6 +9,7 @@ import EventEmitter from 'events';
 import restDBDirect from './RestDBDirect.class';
 import debounce from 'debounce';
 import jscookie from 'js-cookie';
+import discordOauth2 from './DiscordOauth2.class';
 const {
 	runStartupScript,
 } = config;
@@ -26,9 +27,15 @@ class AnnuitCœptis {
 			dataLoading: false,
 			dataLoaded: false,
 			dbConnected: false,
+			dbNetworkError: false,
 			hasWinRef: false,
 		};
 		this.restdb = undefined;
+
+		this.once('gotWindow', (window) => {
+			discordOauth2.setUrl(window.location.search); // Send oauth code to its handler
+			window.Promise = Promise; // Polyfill Promises with Bluebird
+		});
 
 		this.once('dbConnect', () => {
 			this.status.dbConnected = true;
@@ -39,6 +46,18 @@ class AnnuitCœptis {
 				.onNetworkStart(
 					() => {
 						this.status.dataLoading = true;
+						this.reRenderCallback();
+					}
+				)
+				.on('networkError',
+					() => {
+						this.status.dbNetworkError = true;
+						this.reRenderCallback();
+					}
+				)
+				.on('networkClear',
+					() => {
+						this.status.dbNetworkError = false;
 						this.reRenderCallback();
 					}
 				)
@@ -152,11 +171,11 @@ class AnnuitCœptis {
 			if (!this.getDataById(node.id)) {
 				this.data.push(node);
 				this.reRenderCallback();
-			} else {
+			} else {/*
 				console.warn(
 					`Resisted assimilation of ${node.text} on account of the ID is already in the local cache.`, node
 				);
-			}
+			*/}
 		});
 	}
 
@@ -181,7 +200,10 @@ class AnnuitCœptis {
 				this.assimilateNodes(nodes);
 				return nodes;
 			})
-			.then(receiveData);
+			.then(receiveData)
+			.catch((err) => {
+				console.error('Error fetching nodes.', err);
+			});
 	}
 
 	setReRenderCallback(cb) {
@@ -229,6 +251,10 @@ class AnnuitCœptis {
 			this.status.hasWinRef = true;
 			this.ee.emit('gotWindow', window);
 		}
+	}
+
+	getWindow() {
+		return this.window;
 	}
 
 	getRestDB() {

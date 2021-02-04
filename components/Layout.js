@@ -13,7 +13,14 @@ const Layout = props => (
 	<Consumer>
 		{
 			({ annuitCœptis, rc }) => {
-				const className = annuitCœptis.status.dataLoading ? `state5` : 'state2';
+				const className = (
+					annuitCœptis.status.dbNetworkError
+						? 'state3'
+						: annuitCœptis.status.dataLoading
+							? `state5`
+							: 'state2'
+				);
+
 				return (
 					<div className={ styles.container + ' ' + className }>
 						<Head>
