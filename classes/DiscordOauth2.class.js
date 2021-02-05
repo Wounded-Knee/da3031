@@ -29,6 +29,7 @@ class Discord {
 	}
 
 	setUrl(url) {
+		if (url === '') return false;
 		console.log('DiscordOauth2: Got URL ', url);
 
 		const {
@@ -52,6 +53,7 @@ class Discord {
 	}
 
 	setCode(code) {
+		if (code === '') return false;
 		this.code = code;
 		console.log('DiscordOauth2: Got code ', code, this.instance);
 

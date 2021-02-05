@@ -55,6 +55,12 @@ class AnnuitCœptis {
 						this.reRenderCallback();
 					}
 				)
+				.on('initialLoad',
+					() => {
+						this.status.dataLoaded = true;
+						this.reRenderCallback();
+					}
+				)
 				.onNetworkEnd(
 					() => {
 						this.status.dataLoading = false;
@@ -73,14 +79,6 @@ class AnnuitCœptis {
 
 	getRendererByNodeType(nodeType) {
 		return dynamic(() => import('../nodeTypes/'+nodeType+'/Node'));
-	}
-
-	getLocalData() {
-		return JSON.parse(this.window.localStorage.getItem('d3'));
-	}
-
-	setLocalData(data) {
-		this.window.localStorage.setItem('d3', JSON.stringify(data));
 	}
 
 	getRestDBDirect() {
@@ -197,7 +195,11 @@ class AnnuitCœptis {
 		return restDBDirect
 			.getNodes()
 			.then((nodes) => {
-				this.assimilateNodes(nodes);
+				if (nodes) {
+					this.assimilateNodes(nodes);
+				} else {
+					console.error('WTF is this? These arent nodes! ', nodes);
+				}
 				return nodes;
 			})
 			.then(receiveData)

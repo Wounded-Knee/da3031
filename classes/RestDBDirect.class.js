@@ -21,6 +21,8 @@ const axiosInstance = axios.create({
 	withCredentials: false,
 });
 
+var online = true;
+
 const restDBDirect = (new (class RestDBDirect {
 	constructor() {
 		this.freshestNode = undefined;
@@ -32,7 +34,14 @@ const restDBDirect = (new (class RestDBDirect {
 			networkEnd: [],
 			networkError: [],
 			networkClear: [],
+			initialLoad: [],
 		};
+
+		this.on('initialLoad', this.poll.bind(this));
+	}
+
+	useNetwork(bool) {
+		return online = bool;
 	}
 
 	poll() {
@@ -117,7 +126,7 @@ const restDBDirect = (new (class RestDBDirect {
 				this.connections = this.connections.filter(
 					(connection) => connection.isPending()
 				);
-				console.log('Cleaned up ' + (beforeCount - this.connections.length) + ' rejected connections');
+				console.log(`Cleaned up ${(beforeCount - this.connections.length)}/${beforeCount} non-pending connections.`);
 				return false;
 			})
 			.then((cont) => {
@@ -134,6 +143,9 @@ const restDBDirect = (new (class RestDBDirect {
 	}
 
 	createNode(node) {
+		if (!online) {
+			return new Promise((res, rej) => rej('Connection attempt aborted, network kill switch.'));
+		}
 		return this.registerConnection(
 			axiosInstance
 				.post('nodes', node)
@@ -156,6 +168,9 @@ const restDBDirect = (new (class RestDBDirect {
 	}
 
 	getNodes({ freshest }={}) {
+		if (!online) {
+			return new Promise((res, rej) => rej('Connection attempt aborted, network kill switch.'));
+		}
 		const query = freshest && this.freshestNode ? {
 			"_changed": {
 				"$gt": {
@@ -190,7 +205,12 @@ const restDBDirect = (new (class RestDBDirect {
 					}
 				))
 				.then(this.registerNodes.bind(this))
-				.then(this.poll.bind(this))
+				.then((nodes) => {
+					if (!freshest) {
+						this.fire('initialLoad');
+					}
+					return nodes;
+				})
 		);
 	}
 })());

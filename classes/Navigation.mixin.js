@@ -17,12 +17,6 @@ const Navigation = {
 				};
 				this.navigationByNodeCallback = () => { console.error('You need to override navigationByNodeCallback()!'); };
 				this.navCurrentPath = undefined;
-				this.navRtPath = this.createData({
-					text: 'Path',
-				});
-				this.navRtPathStep = this.createData({
-					text: 'Path Step',
-				});
 				return rv;
 			}
 

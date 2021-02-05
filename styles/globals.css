@@ -134,8 +134,10 @@ header .logo {
 .state3 main h1 a,
 .state3 header .logo {
   background-image: url(/circuits.gif);
-  background-image: url(/rainbow-wow.gif);
+  background-image: url(/mesmerize-rainbow.gif);
+  background-image: url(/particles.gif);
   background-size: auto;
+  -webkit-text-stroke: 1px #000;
 }
 
 .state4 main h1 a,
