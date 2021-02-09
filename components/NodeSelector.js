@@ -75,6 +75,8 @@ export default class NodeSelector extends React.Component {
 			<Creatable
 				value={ null }
 				styles={ nodeSelectorStyles }
+				noOptionsMessage={ () => "..." }
+				formatCreateLabel={ (inputValue) => `Say "${inputValue}"` }
 				menuIsOpen={ inputOnly ? false : undefined }
 				onChange={ this.handleChange }
 				onCreateOption={ this.onCreateOption }

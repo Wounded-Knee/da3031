@@ -10,20 +10,38 @@ const rainbowBorder = (provided, state) => ({
   ...provided,
   borderImage: "url(/rainbow.gif) 30 round",
   borderImageRepeat: "stretch",
-  color: "#f00",
 });
 
+const nodeSelectorStylesBase = {
+  container: (provided, state) => ({
+    ...provided,
+    width: '500px',
+    margin: 'auto',
+  }),
+  placeholder: (provided, state) => ({
+    ...provided,
+    margin: 'auto',
+  }),
+};
+
 const nodeSelectorStylesDark = {
-  control: (provided, state) => rainbowBorder(
-    darken(provided, state),
-    state
-  ),
-  input: darken,
+  ...nodeSelectorStylesBase,
+  control: (provided, state) => ({
+    ...rainbowBorder(
+      darken(provided, state),
+      state
+    )
+  }),
+  input: (provided, state) => ({
+    ...darken(provided, state)
+  }),
   menu: darken,
   option: darken,
 };
 
-const nodeSelectorStylesLight = {};
+const nodeSelectorStylesLight = {
+  ...nodeSelectorStylesBase,
+};
 
 const nodeSelectorStyles = config.theme === 'Dark'
   ? nodeSelectorStylesDark

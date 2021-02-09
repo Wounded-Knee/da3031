@@ -6,16 +6,18 @@
 }
 
 .main {
-  padding: 5rem 0;
   justify-content: center;
   align-items: center;
-  width: 600px;
-  margin: auto;
+  margin: 0 -5em;
+  padding: 5rem 7rem;
+  box-shadow: 0px 0 32px -5px rgba(0,0,0,1);
+  -webkit-box-shadow: 0px 0 32px -5px rgba(0,0,0,1);
+  -moz-box-shadow: 0px 0 32px -5px rgba(0,0,0,1);
 }
+
 
 .footer {
   height: 100px;
-  border-top: 1px solid #eaeaea;
   justify-content: center;
   align-items: center;
   text-align: center;
@@ -68,6 +70,7 @@
   justify-content: center;
   flex-wrap: wrap;
   max-width: 800px;
+  margin: auto;
   margin-top: 3rem;
 }
 
@@ -86,8 +89,10 @@
 .card:hover,
 .card:focus,
 .card:active {
-  color: #0070f3;
+  color: #53b2de;
   border-color: #0070f3;
+  border-image: url(/rainbow.gif) 30 round;
+  border-image-repeat: stretch;
 }
 
 .card h3 {

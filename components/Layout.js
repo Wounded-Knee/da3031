@@ -26,7 +26,8 @@ const Layout = props => (
 					<div className={ styles.container + ' ' + className + ' ' + 'theme'+theme }>
 						<Head>
 							<title>{ props.title || "Human Communication" } D³</title>
-							<link rel="icon" href="/favicon.ico" />
+							<link rel="shortcut icon" type="image/gif" href="/d3.gif" />
+							<link rel="icon" type="image/gif" href="/d3.gif" />
 						</Head>
 
 						{ props.title ? (
