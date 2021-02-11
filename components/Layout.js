@@ -3,6 +3,7 @@ import Head from 'next/head'
 import Link from 'next/link'
 import styles from '../styles/Home.module.css'
 import { Consumer } from '../classes/Provider';
+import discordOauth2 from '../classes/DiscordOauth2.class';
 import config from '../config';
 
 const {
@@ -33,12 +34,24 @@ const Layout = props => (
 						{ props.title ? (
 							<header>
 								<Link href="/">
-									<a title="Back to home screen.">
-										<span className="logo">
+									<a title="Back to home screen." className="logo">
+										<span>
 											D<sup>3</sup>
 										</span>
 									</a>
 								</Link>
+
+								<Link href="/debug">
+									<a title="Debug Information">
+										🧪
+									</a>
+								</Link>
+
+				                <Link href={ discordOauth2.getOauth2Url() }>
+									<a title="Discord Login">
+										🗝
+									</a>
+				                </Link>
 
 								{ devMode ? <>
 									<span

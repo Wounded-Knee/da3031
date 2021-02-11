@@ -1,3 +1,19 @@
+@import url(./jsonview.css);
+
 .jsonview-code {
   height: 600px;
+}
+
+dl.stats dt {
+	float: left;
+	width: 100px;
+}
+dl.stats .total {
+	font-weight: bold;
+}
+
+#chart {
+	height: 600px;
+	width: 600px;
+	border: 1px inset #ccc;
 }

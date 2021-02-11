@@ -81,6 +81,7 @@ header {
   -moz-box-shadow: 0px 0px 3px -1px rgba(0,0,0,0.55);
   box-shadow: 0px 0px 3px -1px rgba(0,0,0,0.55);
   height: 45px;
+  overflow: hidden;
 }
 .themeDark header {
   -webkit-box-shadow: 0px 0px 3px -1px rgba(200,200,200,0.55);
@@ -103,13 +104,41 @@ header span.active {
   font-weight: bold;
 }
 
-header span {
-  margin-right: 2em;
+/* Menu Items */
+header a:not(.logo) {
+  background: rgb(9,32,121);
+  background: linear-gradient(0deg, rgb(32, 34, 37) 0%, rgb(51, 53, 55) 76%);
+  padding: 0.3em;
+  float: right;
+  border-radius: 10px 10px 0 0;
+  color: #aaa;
+  border: 1px solid rgb(51, 53, 55);
+  border-bottom: 0;
+  margin-left: 10px;
+
+  -webkit-box-shadow: 0px 0px 3px 2px rgba(0,0,0,0.62);
+  -moz-box-shadow: 0px 0px 3px 2px rgba(0,0,0,0.62);
+  box-shadow: 0px 0px 3px 2px rgba(0,0,0,0.62);
+
+  filter: none;
+  -webkit-filter: grayscale(100%);
+  -moz-filter:    grayscale(100%);
+  -ms-filter:     grayscale(100%);
+  -o-filter:      grayscale(100%);
+}
+header a:hover:not(.logo) {
+  border-top-color: #fff;
+  filter: none;
+  -webkit-filter: none;
+  -moz-filter:    none;
+  -ms-filter:     none;
+  -o-filter:      none;
 }
 
 /* LOGO
 **********/
-header .logo {
+header a.logo span {
+  margin-right: 2em;
   position: absolute;
   top: 0;
   left: 1em;
@@ -121,7 +150,7 @@ main h1 a {
 }
 
 main h1 a,
-header .logo {
+header a.logo span {
   color: #0070f3;
   font-weight: bold;
   background: url(/rainbowPixels.gif) no-repeat;
@@ -132,17 +161,17 @@ header .logo {
 }
 
 .state1 main h1 a,
-.state1 header .logo {
+.state1 header a.logo span {
   background-image: url(/thistoo.gif);
 }
 
 .state2 main h1 a,
-.state2 header .logo {
+.state2 header a.logo span {
   background-image: url(/rainbow.gif);
 }
 
 .state3 main h1 a,
-.state3 header .logo {
+.state3 header a.logo span {
   background-image: url(/circuits.gif);
   background-image: url(/mesmerize-rainbow.gif);
   background-image: url(/particles.gif);
@@ -151,16 +180,15 @@ header .logo {
 }
 
 .state4 main h1 a,
-.state4 header .logo {
+.state4 header a.logo span {
   background-image: url(/crystalline.gif);
 }
 
 .state4 main h1 a,
-.state4 header .logo {
+.state4 header a.logo span {
   background-image: url(/andthis.gif);
 }
 
-@import url(./jsonview.css);
 @import url(../node_modules/react-tabs/style/react-tabs.css);
 
 /* FOOTER
@@ -168,6 +196,9 @@ header .logo {
 footer {
   color: #555;
   font-size: 0.6em;
+}
+footer em {
+  font-style: normal;
 }
 
 .google {
@@ -181,7 +212,7 @@ footer {
 .google {
   display: inline-flex;
   margin-left: 0.5em;
-  opacity: 0.5;
+  opacity: 0.75;
 }
 .xgoogle em>em>em>em,
 .xgoogle em {
