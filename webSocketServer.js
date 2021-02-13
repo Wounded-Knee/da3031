@@ -1,6 +1,9 @@
 const config = require('./config');
 const WebSocket = require('ws');
 const fs = require('fs');
+const {
+	tokenName,
+} = config.ws;
 
 class WebSocketServer {
 	constructor() {
@@ -18,15 +21,22 @@ class WebSocketServer {
 	}
 
 	receive(request, data) {
+		const {
+			[tokenName]: token,
+			...cleanData
+		} = JSON.parse(data);
 		const node = {
-			...JSON.parse(data),
+			...cleanData,
 			date: new Date(),
 			id: this.getNextID(),
 		};
 		console.log(`WS: [${request.socket.remoteAddress}] -> [*] `, node);
 		this.cache.push(node);
 		this.saveCache();
-		this.broadcast([node]);
+		this.broadcast([{
+			...node,
+			[tokenName]: token
+		}]);
 	}
 	
 	getNextID() {
@@ -70,13 +80,14 @@ class WebSocketServer {
 	
 	loadCache() {
 		const { cacheFile } = config.ws;
+		this.cache = [];
 	
 		return new Promise((resolve, reject) => {
 			fs.readFile(cacheFile, 'utf8', (err, data) => {
 		    if (err) {
 		        // No error, there's just no cache yet.
 		        
-						fs.writeFile(cacheFile, '[]', undefined, (err) => {
+						fs.writeFile(cacheFile, JSON.stringify(this.cache), undefined, (err) => {
 							if (err) {
 								throw new Error(`WS: Could not create cache file ${cacheFile}, check permissions.`);
 							} else {

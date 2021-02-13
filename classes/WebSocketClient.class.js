@@ -3,11 +3,8 @@ const WebSocket = require('isomorphic-ws');
 const {
 	port,
 	address,
-	pingInterval,
-	pingTimeout,
-	pingFailures,
+	tokenName,
 } = config.ws;
-const tokenName = 'token';
 const wsUrl = `ws://${address}:${port}/`;
 const ws = new WebSocket(wsUrl);
 
@@ -19,13 +16,19 @@ const WebSocketClient = {
 	onClose: () => {},
 
 	_onMessage: ({ data }) => {
-		const node = JSON.parse(data);
-		const token = node[tokenName];
-		const promises = WebSocketClient.promises[token];
-		if (promises) {
-			promises.resolve(node);
-		}
-		WebSocketClient.onMessage(node);
+		WebSocketClient.onMessage(
+			JSON.parse(data).map((nodeData) => {
+				const {
+					[tokenName]: token,
+					...node
+				} = nodeData;
+				const promises = WebSocketClient.promises[token];
+				if (promises) {
+					promises.resolve(node);
+				}
+				return node;
+			})
+		);
 	},
 	
 	send: (data) => {

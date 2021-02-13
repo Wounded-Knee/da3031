@@ -7,9 +7,6 @@ import jscookie from 'js-cookie';
 import discordOauth2 from './DiscordOauth2.class';
 import dynamic from 'next/dynamic';
 const {
-	runStartupScript,
-} = config;
-const {
 	nodeTypes,
 	mixins,
 } = d3config;
@@ -35,6 +32,8 @@ class AnnuitCœptis {
 
 		this.once('wsConnect', () => {
 			this.status.wsConnected = true;
+			this.status.dataLoaded = true;
+			this.status.dataLoading = false;
 		});
 		this.once('wsDisconnect', () => {
 			this.status.wsConnected = false;
@@ -42,8 +41,6 @@ class AnnuitCœptis {
 
 		WebSocketClient.onMessage = (data) => {
 			this.assimilateNodes(data);
-			this.status.dataLoaded = true;
-			this.status.dataLoading = false;
 		};
 		WebSocketClient.onOpen = this.ee.emit.bind(this.ee, 'wsConnect'); // Race condition, so...
 		this.ee.emit('wsConnect'); // ...fake it
@@ -130,6 +127,10 @@ class AnnuitCœptis {
 	}
 
 	assimilateNodes(nodes) {
+		if (!(nodes instanceof Array)) {
+			console.error('assimilateNodes: These aren\'t nodes: ', nodes);
+			return false;
+		}
 		nodes.forEach((node) => {
 			if (!this.getDataById(node.id, true)) {
 				this.data.push(node);

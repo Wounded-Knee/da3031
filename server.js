@@ -14,11 +14,7 @@ app.prepare().then(() => {
     // This tells it to parse the query portion of the URL.
     const parsedUrl = parse(req.url, true)
     const { pathname, query } = parsedUrl;
-    
-    if (pathname === '/') {
-	    console.log(`WEB: [?.?.?.?] is requesting the D3 Application`);
-    }
-  
+
     if (pathname === '/a') {
       app.render(req, res, '/a', query)
     } else if (pathname === '/b') {

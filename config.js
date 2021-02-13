@@ -4,14 +4,14 @@ const config = {
 	theme: "Dark",
 	web: {
 		port: 8080,
-		address
+		address,
 	},
 	ws: {
 		port: 8081,
 		address,
-		cacheFile: './nodeCache.json'
+		cacheFile: './nodeCache2.json',
+		tokenName: 'token',
 	},
-	runStartupScript: false,
 	discord: {
 		clientId: "806276059242168330",
 		clientSecret: "_uf8_IUWZmGoWUSQQgC6B_hztwb_ERUQ",
