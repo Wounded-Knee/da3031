@@ -1,8 +1,8 @@
+const config = require('../../config');
 import Link from 'next/link'
 import styles from '../../styles/NodeView.module.css'
 import Layout from '../../components/Layout';
 import NodeSelector from '../../components/NodeSelector';
-import config from '../../config';
 import { Consumer } from '../../classes/Provider';
 
 const

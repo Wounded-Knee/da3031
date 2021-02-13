@@ -1,10 +1,10 @@
+const config = require('../config');
 import React from 'react';
 import Head from 'next/head'
 import Link from 'next/link'
 import styles from '../styles/Home.module.css'
 import { Consumer } from '../classes/Provider';
 import discordOauth2 from '../classes/DiscordOauth2.class';
-import config from '../config';
 
 const {
 	devMode,

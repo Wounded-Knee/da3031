@@ -1,15 +1,18 @@
-import config from '../config';
+const config = require('../config');
+import d3config from '../d3.config';
+import WebSocketClient from './WebSocketClient.class';
 import EventEmitter from 'events';
-import restDBDirect from './RestDBDirect.class';
 import debounce from 'debounce';
 import jscookie from 'js-cookie';
 import discordOauth2 from './DiscordOauth2.class';
 import dynamic from 'next/dynamic';
 const {
 	runStartupScript,
+} = config;
+const {
 	nodeTypes,
 	mixins,
-} = config;
+} = d3config;
 
 class AnnuitCœptis {
 	constructor() {
@@ -20,57 +23,31 @@ class AnnuitCœptis {
 		this.status = {
 			dataLoading: false,
 			dataLoaded: false,
-			dbConnected: false,
-			dbNetworkError: false,
+			wsConnected: false,
+			wsNetworkError: false,
 			hasWinRef: false,
 		};
-		this.restdb = undefined;
 
 		this.once('gotWindow', (window) => {
 			discordOauth2.setUrl(window.location.search); // Send oauth code to its handler
 			window.Promise = Promise; // Polyfill Promises with Bluebird
 		});
 
-		this.once('dbConnect', () => {
-			this.status.dbConnected = true;
-			restDBDirect
-				.onReceiveNodes(
-					this.assimilateNodes.bind(this)
-				)
-				.onNetworkStart(
-					() => {
-						this.status.dataLoading = true;
-						this.reRenderCallback();
-					}
-				)
-				.on('networkError',
-					() => {
-						this.status.dbNetworkError = true;
-						this.reRenderCallback();
-					}
-				)
-				.on('networkClear',
-					() => {
-						this.status.dbNetworkError = false;
-						this.reRenderCallback();
-					}
-				)
-				.on('initialLoad',
-					() => {
-						this.status.dataLoaded = true;
-						this.reRenderCallback();
-					}
-				)
-				.onNetworkEnd(
-					() => {
-						this.status.dataLoading = false;
-						this.reRenderCallback();
-					}
-				);
-			this.loadData({ freshest: false });
+		this.once('wsConnect', () => {
+			this.status.wsConnected = true;
+		});
+		this.once('wsDisconnect', () => {
+			this.status.wsConnected = false;
 		});
 
-		this.ee.emit('dbConnect');
+		WebSocketClient.onMessage = (data) => {
+			this.assimilateNodes(data);
+			this.status.dataLoaded = true;
+			this.status.dataLoading = false;
+		};
+		WebSocketClient.onOpen = this.ee.emit.bind(this.ee, 'wsConnect'); // Race condition, so...
+		this.ee.emit('wsConnect'); // ...fake it
+		WebSocketClient.onClose = this.ee.emit.bind(this.ee, 'wsDisconnect');
 	}
 
 	getNodeTypes() {
@@ -81,29 +58,25 @@ class AnnuitCœptis {
 		return dynamic(() => import('../nodeTypes/'+nodeType+'/Node'));
 	}
 
-	getRestDBDirect() {
-		return restDBDirect;
+	on(...options) {
+		return this.ee.on(...options);
 	}
 
-	on(eventName, callBack) {
-		return this.ee.on(eventName, callBack);
-	}
-
-	once(eventName, callBack) {
-		return this.ee.once(eventName, callBack);
+	once(...options) {
+		return this.ee.once(...options);
 	}
 
 	isInitialized() {
 		const {
 			dataLoaded,
 			dataLoading,
-			dbConnected,
+			wsConnected,
 			hasWinRef
 		} = this.status;
 
 		return (
 			dataLoaded &&
-			dbConnected &&
+			wsConnected &&
 			hasWinRef
 		);
 	}
@@ -124,13 +97,18 @@ class AnnuitCœptis {
 		);
 	}
 
-	getDataById(nodeId) {
+	getDataById(nodeId, extant) {
 		const data = this.data.find(item => item.id === nodeId);
-		if (data === undefined) {
-			console.warn(`AnnuitCœptis: Node #${nodeId} not found`);
-			return undefined;
+		if (extant) {
+			return data !== undefined;
+		} else {
+			if (data === undefined) {
+				console.warn(`AnnuitCœptis: Node #${nodeId} not found`);
+				return undefined;
+			} else {
+				return this.hydrateData(data);
+			}
 		}
-		return this.hydrateData(data);
 	}
 
 	hydrateData(data) {
@@ -141,109 +119,30 @@ class AnnuitCœptis {
 	createData(data) {
 		if (!this.isInitialized()) {
 			console.error('Data cannot be created until app initializes.');
-			return new Promise((r,a) => {});
+			return false;
 		}
-		const receiveCreatedData = (createdData) => {
-			console.log('Created node ', createdData, ' using data ', data, ' with id ', createdData.id);
-			const { reRenderCallback = () => {} } = this;
-			this.assimilateNodes([createdData]);
-			reRenderCallback();
-			return createdData;
-		};
-
 		const newData = this.conceiveData(data);
-		const promise = restDBDirect
-				.createNode(newData)
-				.then(receiveCreatedData);
-
-		return promise;
+		return WebSocketClient.send(newData);
 	}
 
 	conceiveData(data) {
-		return {
-			...data,
-			date: new Date()
-		};
+		return data;
 	}
 
 	assimilateNodes(nodes) {
 		nodes.forEach((node) => {
-			if (!this.getDataById(node.id)) {
+			if (!this.getDataById(node.id, true)) {
 				this.data.push(node);
-				this.reRenderCallback();
-			} else {/*
-				console.warn(
-					`Resisted assimilation of ${node.text} on account of the ID is already in the local cache.`, node
-				);
-			*/}
+			}
 		});
-	}
-
-	loadData() {
-		this.status.dataLoaded = false;
-		this.status.dataLoading = true;
-		const { reRenderCallback = () => {} } = this;
-
-		const receiveData = (nodes) => {
-			this.status.dataLoaded = true;
-			this.status.dataLoading = false;
-			this.reRenderCallback();
-			console.log(`Loaded ${nodes.length} nodes from the server.`);
-			return nodes;
-		};
-
-		return restDBDirect
-			.getNodes()
-			.then((nodes) => {
-				if (nodes) {
-					this.assimilateNodes(nodes);
-				} else {
-					console.error('WTF is this? These arent nodes! ', nodes);
-				}
-				return nodes;
-			})
-			.then(receiveData)
-			.catch((err) => {
-				console.error('Error fetching nodes.', err);
-			});
+		this.reRenderCallback();
 	}
 
 	setReRenderCallback(cb) {
-		this.reRenderCallback = debounce(cb, 1000);
-	}
-
-	setRestDB(restDB) {
-		if (!this.restdb) {
-			this.restdb = restDB;
-
-			this.getRestDB().on('DISCONNECT', () => {
-				this.ee.emit('dbDisconnect');
-				this.status.dbConnected = false;
-				this.reRenderCallback();
-			});
-
-			this.getRestDB().on('POST', (error, eventData) => {
-				const {
-					_version, _id,
-					...newData
-				} = eventData.data;
-
-				if (this.getDataById(_id) === undefined) {
-					this.data.push({
-						id: _id,
-						creator: 'setRestDB()',
-						...newData
-					});
-					console.log('RestDB.RDE: Assimilated.', eventData);
-				} else {
-					console.log('RestDB.RDE: ID already exists locally, ignoring.', eventData.text);
-				}
-			});
-
-			this.status.dbConnected = true;
-			this.ee.emit('dbConnect');
-			console.log('RestDB.RDE now listening.');
-		}
+		this.reRenderCallback = debounce(() => {
+			cb();
+			console.log('Re-render requested');
+		}, 1000);
 	}
 
 	setWindow(window) {
@@ -257,10 +156,6 @@ class AnnuitCœptis {
 
 	getWindow() {
 		return this.window;
-	}
-
-	getRestDB() {
-		return this.restdb;
 	}
 };
 
@@ -276,90 +171,6 @@ for (var x=0; x<nodeTypes.length; x++) {
 
 // New instance
 const annuitCœptis = new AnnuitCœptisII();
-
-if (runStartupScript) {
-	// Testing
-	const
-		RT_CHILD_OF = 0,
-		RT_AUTHOR_OF = 1,
-		RT_TRAVELER = 2
-	;
-
-	const nodes = {};
-
-	annuitCœptis.createData({
-		text: 'SYSTEM',
-	}).then(
-		(SYSTEM) => {
-			nodes.SYSTEM = SYSTEM;
-			annuitCœptis.setUser(SYSTEM);
-			return SYSTEM;
-		}
-	).then(
-		(SYSTEM) => annuitCœptis.createUser({
-			text: 'Joel Kramer',
-			rel: {
-				[ RT_AUTHOR_OF ]: [ SYSTEM ]
-			}
-		})
-	).then(
-		(usrJoelKramer) => {
-			nodes.usrJoelKramer = usrJoelKramer;
-			annuitCœptis.setUser(usrJoelKramer);
-			return usrJoelKramer;
-		}
-	).then(
-		(usrJoelKramer) => annuitCœptis.createAvatar({
-			text: 'Heyoka',
-			rel: {
-				[ RT_AUTHOR_OF ]: [ usrJoelKramer ]
-			}
-		})
-	).then(
-		(avaHeyoka) => {
-			nodes.avaHeyoka = avaHeyoka;
-			annuitCœptis.setAvatar(avaHeyoka);
-			return avaHeyoka;
-		}
-	).then(
-		() => annuitCœptis.createAvatar({
-			text: 'Drew',
-			rel: {
-				[ RT_AUTHOR_OF ]: [ nodes.usrJoelKramer ]
-			}
-		})
-	).then(
-		(avaDrew) => {
-			nodes.avaDrew = avaDrew;
-			return avaDrew;
-		}
-	).then(
-		(avaDrew) => annuitCœptis.createData({
-			text: 'Hello, world!',
-			rel: {
-				[ RT_AUTHOR_OF ]: [ nodes.avaHeyoka ]
-			}
-		})
-	).then(
-		(comHeyoka1) => {
-			nodes.comHeyoka1 = comHeyoka1;
-			return comHeyoka1;
-		}
-	).then(
-		(comHeyoka1) => annuitCœptis.createData({
-			text: 'Hi.',
-			rel: {
-				[ RT_AUTHOR_OF ]: [ nodes.avaDrew ],
-				[ RT_CHILD_OF ]: [ comHeyoka1 ]
-			}
-		})
-	).then(
-		() => {
-			annuitCœptis.navigate(undefined, nodes.comHeyoka1);
-			annuitCœptis.navigate(nodes.comHeyoka1, nodes.comDrew1);
-		}
-	);
-}
 
 export {
 	annuitCœptis

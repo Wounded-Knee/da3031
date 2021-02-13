@@ -1,8 +1,8 @@
 import React from 'react';
 import { withRouter } from 'next/router';
 import { annuitCœptis, Component } from '../classes/AnnuitCœptis.class';
-import RestDB from '../classes/restdb';
 import { Provider, Consumer } from '../classes/Provider';
+import Window from './Window';
 
 class AnnuitCœptis extends React.Component {
 	constructor() {
@@ -10,6 +10,7 @@ class AnnuitCœptis extends React.Component {
 		this.state = {
 			renderCount: 0
 		};
+
 		annuitCœptis.setNavigationByNodeCallback( this.navigateToNode.bind(this) );
 		annuitCœptis.setReRenderCallback( this.reRender.bind(this) );
 	}
@@ -35,8 +36,7 @@ class AnnuitCœptis extends React.Component {
 
 		return (
 			<Provider value={ providerData }>
-				<RestDB />
-
+				<Window />
 				{ children }
 			</Provider>
 		);
