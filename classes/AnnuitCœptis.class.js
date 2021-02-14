@@ -39,9 +39,7 @@ class AnnuitCœptis {
 			this.status.wsConnected = false;
 		});
 
-		WebSocketClient.onMessage = (data) => {
-			this.assimilateNodes(data);
-		};
+		WebSocketClient.onMessage = (data) => this.assimilateNodes(data);
 		WebSocketClient.onOpen = this.ee.emit.bind(this.ee, 'wsConnect'); // Race condition, so...
 		this.ee.emit('wsConnect'); // ...fake it
 		WebSocketClient.onClose = this.ee.emit.bind(this.ee, 'wsDisconnect');

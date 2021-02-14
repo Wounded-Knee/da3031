@@ -15,7 +15,7 @@ const config = {
 	discord: {
 		clientId: "806276059242168330",
 		clientSecret: "_uf8_IUWZmGoWUSQQgC6B_hztwb_ERUQ",
-		redirectUri: 'http://d3.jpkramer.com/',
+		redirectUri: 'http://d3.jpkramer.com:8080/',
 	},
 };
 

@@ -29,14 +29,19 @@ const getNodeLinks = () => annuitCœptis.data.reduce(
 	}, { links: [], nodes: [] }
 );
 
-	const width = 240,
-		height = 240; //
+const width = 240,
+	height = 240;
 
 const getChart = () => {
 	const data = getNodeLinks();
+
 	const chartElement = document.getElementById('chart');
-	if (!chartElement) return false;
-	chartElement.innerHTML = ''; // Dirty AF
+	if (!chartElement) {
+		setTimeout(annuitCœptis.reRenderCallback.bind(annuitCœptis), 100);
+		return false;
+	} else {
+		chartElement.innerHTML = ''; // Dirty AF
+	}
 
 	const drag = simulation => {
 	  function dragstarted(event, d) {
@@ -121,11 +126,9 @@ const getChart = () => {
 export default function NodeGraph() {
 	return annuitCœptis.getWindow()
 		? (
-			<Stage width={ width+'px' } height={ height+'px' }>
+			<Stage width={ width+'px' } height={ height+'px' } id="chart">
 				<ZoomContainer>
-					<svg id="chart">
-						{ getChart() }
-					</svg>
+					{ getChart() }
 				</ZoomContainer>
 			</Stage>
 		)

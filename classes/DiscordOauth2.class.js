@@ -17,6 +17,7 @@ class Discord {
 		this.code = undefined;
 		this.returnedState = undefined;
 		this.sentState = undefined;
+		this.bearerToken = undefined;
 	}
 
 	getOauth2Url() {
@@ -60,9 +61,12 @@ class Discord {
 		try {
 			this.instance.tokenRequest({
 				// clientId, clientSecret and redirectUri are omitted, as they were already set on the class constructor
+				code,
 				grantType: "authorization_code",
 				scope: ["identify"],
-			}).then(console.log);
+			}).then(
+				(data) => this.bearerToken = data
+			);
 		} catch(e) {
 			console.error(e);
 		}
