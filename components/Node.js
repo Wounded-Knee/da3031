@@ -1,9 +1,4 @@
-const config = require('../config');
-import AuthorName from './AuthorName';
 import Link from 'next/link';
-import { annuitCœptis } from '../classes/AnnuitCœptis.class';
-import NodeSelector from './NodeSelector';
-import { useRouter } from 'next/router';
 
 export default function Node(props) {
 	const config = {

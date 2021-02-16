@@ -1,4 +1,4 @@
-const address = 'd3.jpkramer.com';
+const address = 'ovh.jpkramer.com';
 const webPort = 8080;
 const config = {
 	devMode: false,
@@ -10,7 +10,7 @@ const config = {
 	ws: {
 		port: 8081,
 		address,
-		cacheFile: './nodeCache.fortunecookies.json',
+		cacheFile: './nodeCache.json',
 		tokenName: 'token',
 	},
 	discord: {

@@ -69,7 +69,7 @@ const WebSocketClient = {
 		return new Promise((resolve, reject) => {
 			const token = WebSocketClient.getToken();
 			WebSocketClient.promises[token] = { resolve, reject };
-			ws.send(JSON.stringify({
+			WebSocketClient.ws.send(JSON.stringify({
 				...data,
 				[tokenName]: token,
 			}));

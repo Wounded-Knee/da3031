@@ -1,6 +1,7 @@
 const config = require('../../config');
 import Link from 'next/link'
 import Layout from '../../components/Layout';
+import Node from '../../components/Node';
 import NodeSelector from '../../components/NodeSelector';
 
 const
