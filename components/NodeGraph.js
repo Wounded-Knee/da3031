@@ -124,13 +124,9 @@ const getChart = () => {
 };
 
 export default function NodeGraph() {
-	return annuitCœptis.getWindow()
-		? (
-			<Stage width={ width+'px' } height={ height+'px' } id="chart">
-				<ZoomContainer>
-					{ getChart() }
-				</ZoomContainer>
-			</Stage>
-		)
-		: null;
+	<Stage width={ width+'px' } height={ height+'px' } id="chart">
+		<ZoomContainer>
+			{ getChart() }
+		</ZoomContainer>
+	</Stage>
 };

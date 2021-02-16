@@ -22,6 +22,7 @@ export default function Node(props) {
 		RenderNode,
 	} = config;
 	const nodeParent = node.getParents ? node.getParents()[0] : undefined;
+	console.log('Rendernode ', RenderNode);
 
 	return (
 		<>

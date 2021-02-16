@@ -1,9 +1,7 @@
 const config = require('../../config');
 import Link from 'next/link'
-import styles from '../../styles/NodeView.module.css'
 import Layout from '../../components/Layout';
 import NodeSelector from '../../components/NodeSelector';
-import { Consumer } from '../../classes/Provider';
 
 const
 	RT_CHILD_OF = 0,
@@ -11,59 +9,40 @@ const
 	RT_TRAVELER = 2
 ;
 
-export default function NodeView() {
+export default function NodeView({ annuitCœptis, router, rc }) {
+	const nodeId = router ? router.query.nodeId : '';
+	const node = annuitCœptis.getDataById(nodeId);
+	console.log(nodeId, node);
+
 	return (
-		<Consumer>
+		<Layout title="Node View">
 			{
-				({ annuitCœptis, router, rc }) => {
-					const nodeId = router ? router.query.nodeId : '';
-					const node = {
-						type: 'default',
-						...annuitCœptis.getDataById(nodeId),
-					};
-					const Node = annuitCœptis.getRendererByNodeType(node.type);
-
-					return (
-						<Layout title="Node View">
-							{
-								!annuitCœptis.status.dataLoaded
-									? (
-										<div className="loading">Loading...</div>
-									) : (
-										annuitCœptis.isInitialized()
-											? (
-												<>
-													<ol className="nodes">
-														{ node
-															? <Node node={ node } />
-															: <p>{ `Node #${nodeId} not found.` }</p>
-														}
-													</ol>
-
-													<NodeSelector
-														nodeOptions={ node.getChildren() }
-														selectOnCreate
-														onSelect={ chosenNode => annuitCœptis.navigate(node, chosenNode) }
-														createNode={
-															(text) => annuitCœptis.createData({
-																text,
-																rel: {
-																	[ RT_AUTHOR_OF ]: [ annuitCœptis.getAvatar() ],
-																	[ RT_CHILD_OF ]: [ node ]
-																}
-															})
-														}
-													/>
-										 		</>
-											) : (
-												"Loading error."
-											)
-									)
+				!annuitCœptis.isInitialized()
+					? <div className="loading">Loading...</div>
+					: <>
+						<ol className="nodes">
+							{ node
+								? <Node node={ node } />
+								: <p>{ `Node #${nodeId} not found.` }</p>
 							}
-						</Layout>
-					);
-				}
+						</ol>
+
+						{ node
+							? <NodeSelector
+								nodeOptions={ node.getChildren() }
+								selectOnCreate
+								onSelect={ chosenNode => annuitCœptis.navigate(node, chosenNode) }
+								createNode={
+									(text) => annuitCœptis.createData({
+										text,
+										rel: {
+											[ RT_CHILD_OF ]: [ node ]
+										}
+									})
+								}
+							/> : null }
+					</>
 			}
-		</Consumer>
-	)
+		</Layout>
+	);
 };

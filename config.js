@@ -1,21 +1,22 @@
-const address = 'joekra5.dreamhosters.com';
+const address = 'd3.jpkramer.com';
+const webPort = 8080;
 const config = {
 	devMode: false,
 	theme: "Dark",
 	web: {
-		port: 8080,
+		port: webPort,
 		address,
 	},
 	ws: {
 		port: 8081,
 		address,
-		cacheFile: './nodeCache2.json',
+		cacheFile: './nodeCache.fortunecookies.json',
 		tokenName: 'token',
 	},
 	discord: {
 		clientId: "806276059242168330",
 		clientSecret: "_uf8_IUWZmGoWUSQQgC6B_hztwb_ERUQ",
-		redirectUri: 'http://d3.jpkramer.com:8080/',
+		redirectUri: `http://${address}:${webPort}/`,
 	},
 };
 

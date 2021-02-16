@@ -19,6 +19,10 @@ class WebSocketServer {
 			connection.send(JSON.stringify(data));
 		});
 	}
+	
+	send(connection, data) {
+		return connection.send(JSON.stringify(data));
+	}
 
 	receive(request, data) {
 		const {
@@ -59,7 +63,7 @@ class WebSocketServer {
 		connection.on('message', this.receive.bind(this, request));
 
 		// Send all nodes
-		connection.send(JSON.stringify(this.cache));
+		this.send(connection, this.cache);
 		console.log(`WS: [${request.socket.remoteAddress}] just connected, so we have sent them ${this.cache.length} nodes from RAM cache`);
 	}
 	
