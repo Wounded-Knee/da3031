@@ -1,11 +1,9 @@
-const address = 'ovh.jpkramer.com';
-const webPort = 8080;
 const config = {
 	devMode: false,
 	theme: "Dark",
 	web: {
-		port: webPort,
-		address,
+		port: webPort = 8080,
+		address: address = 'd3.jpkramer.com',
 	},
 	ws: {
 		port: 8081,

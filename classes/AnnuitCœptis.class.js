@@ -9,11 +9,14 @@ const {
 	mixins,
 } = d3config;
 
-class AnnuitCœptis {
-	constructor() {
-		this.data = [];
+class AnnuitCœptisAbstract {
+	constructor({ router, setState }) {
+		console.log('AnnuitCœptis', this);
 		this.ee = new EventEmitter();
-		this.setReRenderCallback( () => {} );
+		const emitter = (eventType) => this.emit.bind(this, eventType);
+		this.data = [];
+		this.setState = setState || this.setState;
+		this.router = router;
 		this.status = {
 			dataLoading: false,
 			dataLoaded: false,
@@ -26,16 +29,39 @@ class AnnuitCœptis {
 		});
 
 		this.once('wsConnect', () => {
-			this.status.wsConnected = true;
+			this.setStatus('wsConnected', true);
 		});
 		this.once('wsDisconnect', () => {
-			this.status.wsConnected = false;
+			this.setStatus('wsConnected', false);
 		});
 
 		WebSocketClient.onMessage = (data) => this.assimilateNodes(data);
-		WebSocketClient.onClose = this.ee.emit.bind(this.ee, 'wsDisconnect');
-		WebSocketClient.onOpen = this.ee.emit.bind(this.ee, 'wsConnect'); // Race condition, so...
+		WebSocketClient.onClose = emitter('wsDisconnect');
+		WebSocketClient.onOpen = emitter('wsConnect');
 		WebSocketClient.connect();
+	}
+	
+	setState() {
+		throw new Error('You\'re supposed to override AnnuitCœptisAbstract.setState().');
+	}
+	
+	setStatus(type, bool) {
+		this.setState((state, props) => ({
+			status: {
+				...state.status,
+				[type]: bool,
+			},
+		}));
+	}
+	
+	navigateToNode({ id }) {
+		return this.router.push(`/node/${id}`);
+	}
+	
+	reRender() {
+		return this.setState((state, props) => ({
+			renderCount: state.renderCount+1
+		}));
 	}
 
 	getNodeTypes() {
@@ -52,6 +78,10 @@ class AnnuitCœptis {
 
 	once(...options) {
 		return this.ee.once(...options);
+	}
+	
+	emit(...options) {
+		return this.ee.emit(...options);
 	}
 
 	isInitialized() {
@@ -120,37 +150,27 @@ class AnnuitCœptis {
 			console.error('assimilateNodes: These aren\'t nodes: ', nodes);
 			return false;
 		}
-		this.status.dataLoaded = true;
-		this.status.dataLoading = false;
+		this.setStatus('dataLoaded', true);
+		this.setStatus('dataLoading', false);
 		nodes.forEach((node) => {
 			if (!this.getDataById(node.id, true)) {
 				this.data.push(node);
 			}
 		});
-		this.reRenderCallback();
-	}
-
-	setReRenderCallback(cb) {
-		this.reRenderCallback = debounce(() => {
-			cb();
-			console.log('Re-render requested');
-		}, 1000);
+		this.reRender();
 	}
 };
 
 // Mix in mixins
-for (var x=0, AnnuitCœptisII=AnnuitCœptis; x<mixins.length; x++) {
-	AnnuitCœptisII = (mixins[x].extend || function(y) { return y })(AnnuitCœptisII);
+for (var x=0, AnnuitCœptis=AnnuitCœptisAbstract; x<mixins.length; x++) {
+	AnnuitCœptis = (mixins[x].extend || function(y) { return y })(AnnuitCœptis);
 }
 
 // Mix in nodeTypes
 for (var x=0; x<nodeTypes.length; x++) {
-	AnnuitCœptisII = (nodeTypes[x].extend || function(y) { return y })(AnnuitCœptisII);
+	AnnuitCœptis = (nodeTypes[x].extend || function(y) { return y })(AnnuitCœptis);
 }
 
-// New instance
-const annuitCœptis = new AnnuitCœptisII();
-
 export {
-	annuitCœptis
+	AnnuitCœptis
 };

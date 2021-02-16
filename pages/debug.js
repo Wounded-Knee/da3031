@@ -36,7 +36,7 @@ export default function Debug({ annuitCœptis, router, rc }) {
 
 			{ /*
 			<h2>Node Graph</h2>
-			<NodeGraph />
+			<NodeGraph annuitCœptis={ annuitCœptis } />
 			*/ }
 
 			<h2>Raw Data</h2>

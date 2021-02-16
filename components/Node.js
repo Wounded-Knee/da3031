@@ -17,7 +17,6 @@ export default function Node(props) {
 		RenderNode,
 	} = config;
 	const nodeParent = node.getParents ? node.getParents()[0] : undefined;
-	console.log('Rendernode ', RenderNode);
 
 	return (
 		<>
@@ -28,7 +27,7 @@ export default function Node(props) {
 					recursionCount={ recursionCount+1 }
 				/>
 			}
-			<li className={ `node type_${nodeType}` }>
+			<li className={ `node type_${nodeType} recursion_${recursionCount}` }>
 				<Link href={ `/node/${ node.id.toString() }` }>
 					<a>
 						<RenderNode {...props} />

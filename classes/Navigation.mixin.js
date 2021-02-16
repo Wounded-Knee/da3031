@@ -11,22 +11,8 @@ const Navigation = {
 		class AnnuitCœptisII extends AnnuitCœptis {
 			constructor(mixins) {
 				const rv = super(mixins);
-				this.status = {
-					...this.status,
-					navByNodeCB: false
-				};
-				this.navigationByNodeCallback = () => { console.error('You need to override navigationByNodeCallback()!'); };
 				this.navCurrentPath = undefined;
 				return rv;
-			}
-
-			isInitialized() {
-				return super.isInitialized() && this.status.navByNodeCB;
-			}
-
-			setNavigationByNodeCallback(cb) {
-				this.navigationByNodeCallback = cb;
-				this.status.navByNodeCB = true;
 			}
 
 			navigate(origin, destination) {
@@ -48,13 +34,13 @@ const Navigation = {
 							]
 						);
 					}).then( (input) => {
-						this.navigationByNodeCallback(destination);
+						this.navigateToNode(destination);
 						return input;
 					}).catch( (err) => {
 						console.error(err);
 					});
 				} else {
-					this.navigationByNodeCallback(destination);
+					this.navigateToNode(destination);
 				}
 			}
 		};
