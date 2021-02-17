@@ -7,7 +7,7 @@ const
 ;
 
 const Navigation = (d3) => mixin(d3, {
-	'navigate': function(_super, origin, destination) {
+	navigate: function(_super, origin, destination) {
 		console.log('Navigating from ', origin, ' to ', destination);
 		if (!origin && this.getAvatar()) {
 			this.createData({
@@ -28,9 +28,7 @@ const Navigation = (d3) => mixin(d3, {
 			}).then( (input) => {
 				this.navigateToNode(destination);
 				return input;
-			}).catch( (err) => {
-				console.error(err);
-			});
+			}).catch( (err) => console.error );
 		} else {
 			this.navigateToNode(destination);
 		}

@@ -2,7 +2,6 @@ import mixin from '../../util/mixin';
 
 const RelationshipTypes = [
 	{
-		id: 0,
 		text: 'Lineage',
 		constant: 'CHILD_OF',
 		titles: [
@@ -11,7 +10,6 @@ const RelationshipTypes = [
 		]
 	},
 	{
-		id: 1,
 		text: 'Authorship',
 		constant: 'WORK_OF',
 		titles: [
@@ -20,7 +18,6 @@ const RelationshipTypes = [
 		]
 	},
 	{
-		id: 2,
 		text: 'Path\'s step',
 		titles: [
 			{s: 'path', p: 'paths'},
@@ -28,7 +25,6 @@ const RelationshipTypes = [
 		]
 	},
 	{
-		id: 3,
 		text: 'Traveler\'s Path',
 		titles: [
 			{s: 'path', p: 'paths'},
@@ -46,7 +42,7 @@ const suppressRelationNodes = true; // Exclude all nodes which contain relations
 const expandRelationships = true; // Include related nodes as branches of main nodes (1 level deep)
 
 const Relation = (d3) => mixin(d3, {
-	'getData': function(_super, ...options) {
+	getData: function(_super, ...options) {
 			return _super(...options)
 				.map(
 					item => ( expandRelationships ? {
@@ -63,11 +59,11 @@ const Relation = (d3) => mixin(d3, {
 				.filter(item => !suppressRelationNodes || item.relationType_id === undefined);
 	},
 	
-	'getRelationshipTypes': function(_super, ...options) {
+	getRelationshipTypes: function(_super, ...options) {
 		return RelationshipTypes.map(rt => this.getRelationshipTypeById(rt.id));
 	},
 	
-	'getRelationshipTypeById': function(_super, id) {
+	getRelationshipTypeById: function(_super, id) {
 		const rt = RelationshipTypes.find(rt => rt.id === id);
 		return {
 			...rt,
@@ -85,21 +81,9 @@ const Relation = (d3) => mixin(d3, {
 		};
 	},
 	
-	'link': function(_super, relationshipType, relatives) {
-		if (!relationshipType) {
-			console.log(`link() error: No relationship type`, relationshipType);
-			return new Promise(
-				(res, rej) => rej()
-			);
-		}
-		if (relatives.filter( r => r.id === null ).length > 0) {
-			console.error(`link() error: Cannot create relationship because one of these nodes has no id: `, relatives);
-			return new Promise(
-				(res, rej) => rej()
-			);
-		}
+	link: function(_super, relationshipType, relatives) {
 		console.group(`Relationship: Linking nodes ${relatives.map( rel => rel.text ).join(', ') } as ${relationshipType.text}`);
-		return this.createData({
+		return this.createNode({
 			relationType_id: relationshipType.id,
 			relatives: relatives.map( relative => relative.id )
 		}).then(
@@ -110,7 +94,7 @@ const Relation = (d3) => mixin(d3, {
 		);
 	},
 
-	'hydrateData': function(_super, data) {
+	hydrateData: function(_super, data) {
 		const superData = _super(data);
 
 		return {
@@ -151,7 +135,7 @@ const Relation = (d3) => mixin(d3, {
 		};
 	},
 
-	'createData': function(_super, data) {
+	createData: function(_super, data) {
 		const { rel, ...newData } = data;
 		return _super(newData).then(
 			(parentNode) => {
@@ -183,4 +167,7 @@ const Relation = (d3) => mixin(d3, {
 	},
 });
 
-export default Relation
+export {
+	Relation,
+	RelationshipTypes,
+}

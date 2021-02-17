@@ -1,5 +1,4 @@
-import config from '../../d3.config';
-import Link from 'next/link'
+import Link from 'next/link';
 import Layout from '../../components/Layout';
 import Node from '../../components/Node';
 import NodeSelector from '../../components/NodeSelector';
@@ -13,7 +12,6 @@ const
 export default function NodeView({ d3 }) {
 	const nodeId = d3.getQuery().nodeId;
 	const node = d3.getDataById(nodeId);
-	console.log(nodeId, node);
 
 	return (
 		<Layout title="Node View">

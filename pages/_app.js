@@ -1,10 +1,11 @@
 import React from 'react';
-import '../styles/globals.css'
+import '../styles/globals.css';
+import '../styles/jsonview.css';
 import config from '../d3.config';
 import EventEmitter from 'events';
 import debounce from 'debounce';
 import dynamic from 'next/dynamic';
-import WebSocketClient from '../classes/WebSocketClient.class';
+import WebSocketClient from '../util/WebSocketClient';
 import discordOauth2 from '../classes/DiscordOauth2.class';
 import { withRouter } from 'next/router';
 const { mixins } = config;
@@ -15,7 +16,6 @@ class D3 extends React.Component {
 		console.log(this);
 		this.ee = new EventEmitter();
 		this.state = {
-			renderCount: 0,
 			nodes: [],
 			status: {
 				dataLoading: false,
@@ -36,54 +36,6 @@ class D3 extends React.Component {
 		WebSocketClient.onOpen = () => this.setStatus('wsConnected', true);
 		WebSocketClient.connect();
 	}
-	
-	getQuery() {
-		return this.props.router.query;
-	}
-
-	setStatus(type, bool) {
-		this.setState((state, props) => ({
-			status: {
-				...state.status,
-				[type]: bool,
-			},
-		}));
-		return this;
-	}
-	
-	getStatus(type) {
-		return this.state.status[type];
-	}
-	
-	navigateToNode({ id }) {
-		return this.router.push(`/node/${id}`);
-	}
-	
-	reRender() {
-		return this.setState((state, props) => ({
-			renderCount: state.renderCount+1
-		}));
-	}
-
-	getNodeTypes() {
-		return [];
-	}
-
-	getRendererByNodeType(nodeType) {
-		return dynamic(() => import('../nodeTypes/'+nodeType+'/Node'));
-	}
-
-	on(...options) {
-		return this.ee.on(...options);
-	}
-
-	once(...options) {
-		return this.ee.once(...options);
-	}
-	
-	emit(...options) {
-		return this.ee.emit(...options);
-	}
 
 	isInitialized() {
 		const {
@@ -98,20 +50,32 @@ class D3 extends React.Component {
 		);
 	}
 
+	getQuery() {
+		return this.props.router.query;
+	}
+
+	navigateToNode({ id }) {
+		return this.router.push(`/node/${id}`);
+	}
+
+	// Legacy Methods ---
 	getData(...options) {
 		return this.getNodes(...options);
 	}
-	
-	getNodes() {
-		return this.state.nodes.map(
-			this.hydrateData.bind(this)
-		);
+	getDataById(...options) {
+		return this.getNodeById(...options);
+	}
+	hydrateData(data) {
+		return data;
+	}
+	getRendererByNodeType(nodeType) {
+		return dynamic(() => import('../nodeTypes/'+nodeType+'/Node'));
 	}
 
+	// Nodes ---
 	filter(criteriaFunc) {
 		return this.state.nodes.filter(criteriaFunc).map(this.hydrateData.bind(this));
 	}
-
 	getOrphans() {
 		return this.filter(
 			(node) => {
@@ -120,11 +84,6 @@ class D3 extends React.Component {
 			}
 		);
 	}
-
-	getDataById(...options) {
-		return this.getNodeById(...options);
-	}
-	
 	getNodeById(id, extant) {
 		const node = this.state.nodes.find(item => item.id == id);
 		if (extant) {
@@ -138,25 +97,14 @@ class D3 extends React.Component {
 			}
 		}
 	}
-
-	hydrateData(data) {
-		// Todo: Relations
-		return data;
+	getNodes() {
+		return this.state.nodes.map(
+			this.hydrateData.bind(this)
+		);
 	}
-
-	createData(data) {
-		if (!this.isInitialized()) {
-			console.error('Data cannot be created until app initializes.');
-			return false;
-		}
-		const newData = this.conceiveData(data);
-		return WebSocketClient.send(newData);
+	createNode(data) {
+		return WebSocketClient.send(data);
 	}
-
-	conceiveData(data) {
-		return data;
-	}
-
 	assimilateNodes(nodes) {
 		if (!(nodes instanceof Array)) {
 			console.error('assimilateNodes: These aren\'t nodes: ', nodes);
@@ -171,8 +119,33 @@ class D3 extends React.Component {
 		}));
 	}
 
+	// Status ---
+	setStatus(type, bool) {
+		this.setState((state, props) => ({
+			status: {
+				...state.status,
+				[type]: bool,
+			},
+		}));
+		return this;
+	}
+	getStatus(type) {
+		return this.state.status[type];
+	}
+	
+	// Event Emitter ---
+	on(...options) {
+		return this.ee.on(...options);
+	}
+	once(...options) {
+		return this.ee.once(...options);
+	}
+	emit(...options) {
+		return this.ee.emit(...options);
+	}
+
 	render() {
-		const { router, Component, pageProps } = this.props;
+		const { Component, pageProps } = this.props;
 		const props = {
 			d3: this,
 			...pageProps,

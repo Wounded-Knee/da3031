@@ -8,26 +8,24 @@ export default function Debug({ d3 }) {
 	const { nodes } = d3.state;
 	const Status = ({ statusName, trueIsGood=false }) => {
 		const value = d3.getStatus(statusName);
-		return (
-			<p style={{ color: value === trueIsGood ? 'green' : 'red' }}>
-				{ statusName }={ value ? '1' : '0' }
-			</p>
-		);
+		return <>
+			<dt>{ statusName }</dt>
+			<dd style={{ color: value === trueIsGood ? 'green' : 'red' }}>{ value ? 'TRUE' : 'FALSE' }</dd>
+		</>;
 	};
 
 	return (
 		<Layout title="Debug Information" d3={ d3 }>
+			<h2>Engine</h2>
+			<dl className={ styles.stats }>
+				<Status statusName="dataLoading" />
+				<Status statusName="dataLoaded" trueIsGood />
+				<Status statusName="wsConnected" trueIsGood />
+				<Status statusName="wsNetworkError" />
+			</dl>
+	
 			<h2>Node Statistics</h2>
 			<dl className={ styles.stats }>
-				<dt>Status</dt>
-				<dd>
-					<Status statusName="dataLoading" />
-					<Status statusName="dataLoaded" trueIsGood />
-					<Status statusName="wsConnected" trueIsGood />
-					<Status statusName="wsNetworkError" />
-				</dd>
-				<dt>Render Count</dt>
-				<dd>{ d3.state.renderCount }</dd>
 				<dt>Data</dt>
 				<dd>{ nodes.filter((node) => node.relationType_id === undefined).length }</dd>
 				<dt>Relational</dt>
@@ -44,6 +42,7 @@ export default function Debug({ d3 }) {
 			<h2>Raw Data</h2>
 			<JsonView
 				obj={ nodes }
+				className={ styles['jsonview-code'] }
 				showLineNumbers
 			/>
 		</Layout>
