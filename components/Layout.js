@@ -1,4 +1,4 @@
-const config = require('../config');
+import config from '../d3.config';
 import React from 'react';
 import Head from 'next/head'
 import Link from 'next/link'

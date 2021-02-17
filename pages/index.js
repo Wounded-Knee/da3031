@@ -1,4 +1,4 @@
-const config = require('../config');
+import config from '../d3.config';
 import Head from 'next/head'
 import Link from 'next/link'
 import styles from '../styles/Home.module.css'
@@ -13,11 +13,9 @@ const {
 } = config.discord;
 
 export default function Home(props) {
-  const {
-    annuitCœptis, router, rc
-  } = props;
+  const { d3 } = props;
 
-  const orphans = annuitCœptis.getOrphans().filter(
+  const orphans = d3.getOrphans().filter(
     (orphan) => orphan.relationType_id === undefined
   );
 
@@ -33,16 +31,16 @@ export default function Home(props) {
 				Human Communication
 			</p>
 
-      { annuitCœptis.isInitialized() ? (
+      { d3.isInitialized() ? (
         <>
           <NodeSelector
             nodeOptions={ orphans }
             selectOnCreate={ true }
             placeholder="Say something!"
             inputOnly={ false }
-            onSelect={ annuitCœptis.navigate.bind(annuitCœptis, undefined) }
+            onSelect={ d3.navigate.bind(d3, undefined) }
             createNode={
-              (text) => annuitCœptis.createData({
+              (text) => d3.createData({
                 text
               })
             }
@@ -61,7 +59,7 @@ export default function Home(props) {
             }
     			</div>
         </>
-      ) : ( annuitCœptis.getStatus('wsNetworkError')
+      ) : ( d3.getStatus('wsNetworkError')
         ? <div className="loading">Disconnected</div>
         : <div className="loading">Loading...</div>
       ) }

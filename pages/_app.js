@@ -1,13 +1,13 @@
 import React from 'react';
 import '../styles/globals.css'
-import d3config from '../d3.config';
+import config from '../d3.config';
 import EventEmitter from 'events';
 import debounce from 'debounce';
 import dynamic from 'next/dynamic';
 import WebSocketClient from '../classes/WebSocketClient.class';
 import discordOauth2 from '../classes/DiscordOauth2.class';
 import { withRouter } from 'next/router';
-const { mixins } = d3config;
+const { mixins } = config;
 
 class D3 extends React.Component {
 	constructor(props) {
@@ -35,6 +35,10 @@ class D3 extends React.Component {
 		WebSocketClient.onClose = () => this.setStatus('wsConnected', false);
 		WebSocketClient.onOpen = () => this.setStatus('wsConnected', true);
 		WebSocketClient.connect();
+	}
+	
+	getQuery() {
+		return this.props.router.query;
 	}
 
 	setStatus(type, bool) {
@@ -170,9 +174,7 @@ class D3 extends React.Component {
 	render() {
 		const { router, Component, pageProps } = this.props;
 		const props = {
-			annuitCœptis: this,
-			rc: this.state.renderCount,
-			router: router,
+			d3: this,
 			...pageProps,
 		};
 
