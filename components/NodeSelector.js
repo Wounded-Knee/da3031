@@ -1,5 +1,4 @@
 import React from 'react';
-import { annuitCœptis } from '../classes/AnnuitCœptis.class';
 import Creatable, { makeCreatableSelect } from 'react-select/creatable';
 import nodeSelectorStyles from '../styles/nodeSelectorStyles';
 

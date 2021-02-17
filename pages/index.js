@@ -61,7 +61,7 @@ export default function Home(props) {
             }
     			</div>
         </>
-      ) : ( annuitCœptis.status.wsNetworkError
+      ) : ( annuitCœptis.getStatus('wsNetworkError')
         ? <div className="loading">Disconnected</div>
         : <div className="loading">Loading...</div>
       ) }

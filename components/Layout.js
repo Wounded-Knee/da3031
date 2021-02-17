@@ -10,7 +10,7 @@ const {
 	theme,
 } = config;
 
-const Layout = ({ annuitCœptis, rc, title, children }) => {
+const Layout = ({ title, children }) => {
 	return (
 		<div className={ [styles.container, 'state2', 'theme'+theme].join(' ') }>
 			<Head>
