@@ -79,8 +79,11 @@ class D3 extends React.Component {
 	getOrphans() {
 		return this.filter(
 			(node) => {
-				const _node = this.hydrateData(node);
-				return _node.getParents().length === 0;
+				const {
+					getParents,
+					mixin_id,
+				} = this.hydrateData(node);
+				return getParents().length === 0 && mixin_id === undefined;
 			}
 		);
 	}

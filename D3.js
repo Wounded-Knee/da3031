@@ -18,7 +18,10 @@ class D3 {
 			return nodes.reduce((promiseChain, node) => {
 		    return promiseChain.then(chainResults =>
 	        webSocketServer
-	        	.addNode(node)
+	        	.addNode({
+	        		...node,
+	        		mixin_id: mixin.id,
+	        	})
 	        	.then(() => { console.log(`Registered ${mixin.name}:${node.text}`)})
 			  );
 			}, Promise.resolve([])).then(arrayOfResults => {

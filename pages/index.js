@@ -40,7 +40,7 @@ export default function Home(props) {
             inputOnly={ false }
             onSelect={ d3.navigate.bind(d3, undefined) }
             createNode={
-              (text) => d3.createData({
+              (text) => d3.createNode({
                 text
               })
             }

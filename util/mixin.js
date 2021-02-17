@@ -6,6 +6,12 @@ const mixin = (d3, methods) => {
 	return d3;
 };
 
+const getNodes = (id) => {
+	console.log('xxx', this);
+	return this.state.nodes.filter((node) => node.mixin_id === id);
+};
+
 module.exports = {
-	mixin
+	mixin,
+	getNodes,
 };
