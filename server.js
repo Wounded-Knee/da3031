@@ -1,5 +1,5 @@
 const config = require('./config');
-const webSocketServer = require('./webSocketServer');
+const D3 = require('./D3');
 const { createServer } = require('http')
 const { parse } = require('url')
 const next = require('next')

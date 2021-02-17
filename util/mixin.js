@@ -6,4 +6,6 @@ const mixin = (d3, methods) => {
 	return d3;
 };
 
-export default mixin
+module.exports = {
+	mixin
+};

@@ -9,6 +9,7 @@ class WebSocketServer {
 	constructor() {
 		this.nextID = 0;
 		this.connections = [];
+		this.onNewCacheCallback = () => Promise.resolve();
 		this.loadCache().then(() => {
 			this.startListening();
 		});
@@ -27,20 +28,31 @@ class WebSocketServer {
 	receive(request, data) {
 		const {
 			[tokenName]: token,
-			...cleanData
+			...node
 		} = JSON.parse(data);
-		const node = {
-			...cleanData,
-			date: new Date(),
-			id: this.getNextID(),
-		};
-		console.log(`WS: [${request.socket.remoteAddress}] -> [*] `, node);
-		this.cache.push(node);
-		this.saveCache();
-		this.broadcast([{
-			...node,
-			[tokenName]: token
-		}]);
+
+		return this.addNode(node, request, token);
+	}
+	
+	addNode(node, request, token) {
+		const remoteAddress = request ? request.socket.remoteAddress : 'SYSTEM';
+		return new Promise((resolve, reject) => {
+			const node2 = {
+				...node,
+				date: new Date(),
+				id: this.getNextID(),
+			};
+			const node3 = token ? {
+				...node2,
+				[tokenName]: token,
+			} : node2;
+			this.cache.push(node3);
+			this.saveCache().then((res) => {
+				this.broadcast([ node3 ]);
+				console.log(`WS: [${remoteAddress}] -> [*] `, node3);
+				resolve();
+			});
+		});
 	}
 	
 	getNextID() {
@@ -90,15 +102,16 @@ class WebSocketServer {
 			fs.readFile(cacheFile, 'utf8', (err, data) => {
 		    if (err) {
 		        // No error, there's just no cache yet.
-		        
-						fs.writeFile(cacheFile, JSON.stringify(this.cache), undefined, (err) => {
-							if (err) {
-								throw new Error(`WS: Could not create cache file ${cacheFile}, check permissions.`);
-							} else {
-								console.warn(`WS: No Node cache found, created one at ${cacheFile}`);
-		        		resolve();
-							}
-						});
+		        this.onNewCacheCallback().then(() => {
+							fs.writeFile(cacheFile, JSON.stringify(this.cache), undefined, (err) => {
+								if (err) {
+									throw new Error(`WS: Could not create cache file ${cacheFile}, check permissions.`);
+								} else {
+									console.warn(`WS: No Node cache found, created one at ${cacheFile}`);
+			        		resolve();
+								}
+							});
+		        });
 		    } else {
 						this.cache = JSON.parse(data);
 						this.nextID = this.cache.reduce(
@@ -110,6 +123,10 @@ class WebSocketServer {
 		    }
 			});
 		});
+	}
+	
+	onNewCache(callback) {
+		this.onNewCacheCallback = callback;
 	}
 }
 

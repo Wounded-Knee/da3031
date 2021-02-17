@@ -25,7 +25,7 @@ class D3 extends React.Component {
 			}
 		};
 
-		mixins.forEach((mixin) => mixin(this));
+		mixins.forEach((mixin) => mixin.Mixin(this));
 
 		this.once('gotWindow', (window) => {
 			discordOauth2.setUrl(window.location.search); // Send oauth code to its handler

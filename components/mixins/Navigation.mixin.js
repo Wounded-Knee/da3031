@@ -1,4 +1,5 @@
-import mixin from '../../util/mixin';
+const { mixin } = require('../../util/mixin');
+const id = '1022c6db-3ab0-4e0c-8b3e-e108f692691c';
 const
 	RT_CHILD_OF = 0,
 	RT_AUTHOR_OF = 1,
@@ -6,7 +7,7 @@ const
 	RT_TRAVELER = 3
 ;
 
-const Navigation = (d3) => mixin(d3, {
+const Mixin = (d3) => mixin(d3, {
 	navigate: function(_super, origin, destination) {
 		console.log('Navigating from ', origin, ' to ', destination);
 		if (!origin && this.getAvatar()) {
@@ -35,4 +36,9 @@ const Navigation = (d3) => mixin(d3, {
 	},
 });
 
-export default Navigation
+module.exports = {
+	Mixin,
+	name: 'Navigation',
+	nodes: [],
+	id,
+};

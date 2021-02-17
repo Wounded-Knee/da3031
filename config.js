@@ -1,6 +1,10 @@
+const Relation = require('./components/mixins/Relation.mixin');
+const Navigation = require('./components/mixins/Navigation.mixin');
+
 const config = {
 	devMode: false,
 	theme: "Dark",
+	mixins: [Relation, Navigation],
 	web: {
 		port: webPort = 8080,
 		address: address = 'd3.jpkramer.com',

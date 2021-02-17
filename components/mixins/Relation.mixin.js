@@ -1,7 +1,9 @@
-import mixin from '../../util/mixin';
+const { mixin } = require('../../util/mixin');
+const id = 'd75f74d5-45d7-4c02-906e-bfd947a1f440';
 
 const RelationshipTypes = [
 	{
+		mixin_id: id,
 		text: 'Lineage',
 		constant: 'CHILD_OF',
 		titles: [
@@ -10,6 +12,7 @@ const RelationshipTypes = [
 		]
 	},
 	{
+		mixin_id: id,
 		text: 'Authorship',
 		constant: 'WORK_OF',
 		titles: [
@@ -18,6 +21,7 @@ const RelationshipTypes = [
 		]
 	},
 	{
+		mixin_id: id,
 		text: 'Path\'s step',
 		titles: [
 			{s: 'path', p: 'paths'},
@@ -25,6 +29,7 @@ const RelationshipTypes = [
 		]
 	},
 	{
+		mixin_id: id,
 		text: 'Traveler\'s Path',
 		titles: [
 			{s: 'path', p: 'paths'},
@@ -41,7 +46,7 @@ const relationshipGetterNames = [
 const suppressRelationNodes = true; // Exclude all nodes which contain relationship information
 const expandRelationships = true; // Include related nodes as branches of main nodes (1 level deep)
 
-const Relation = (d3) => mixin(d3, {
+const Mixin = (d3) => mixin(d3, {
 	getData: function(_super, ...options) {
 			return _super(...options)
 				.map(
@@ -167,7 +172,11 @@ const Relation = (d3) => mixin(d3, {
 	},
 });
 
-export {
-	Relation,
-	RelationshipTypes,
-}
+const nodes = RelationshipTypes;
+
+module.exports = {
+	Mixin,
+	name: 'Relation',
+	nodes,
+	id,
+};
