@@ -131,7 +131,7 @@ class D3 extends React.Component {
 			return node !== undefined;
 		} else {
 			if (node === undefined) {
-				console.warn(`AnnuitCœptis: Node #${id} not found`);
+				console.warn(`D3: Node #${id} not found`);
 				return undefined;
 			} else {
 				return this.hydrateData(node);
