@@ -27,9 +27,11 @@ export default function Debug({ d3 }) {
 			<h2>Node Statistics</h2>
 			<dl className={ styles.stats }>
 				<dt>Data</dt>
-				<dd>{ nodes.filter((node) => node.relationType_id === undefined).length }</dd>
+				<dd>{ nodes.filter((node) => node.relationType_id === undefined && node.mixin_id === undefined).length }</dd>
+				<dt>Static</dt>
+				<dd>{ nodes.filter((node) => node.mixin_id !== undefined).length }</dd>
 				<dt>Relational</dt>
-				<dd>{ nodes.filter((node) => node.relationType_id !== undefined).length }</dd>
+				<dd>{ nodes.filter((node) => node.relationType_id !== undefined && node.mixin_id === undefined).length }</dd>
 				<dt className={ styles.total }>Total</dt>
 				<dd className={ styles.total }>{ nodes.length }</dd>
 			</dl>

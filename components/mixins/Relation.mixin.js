@@ -1,5 +1,4 @@
-const { mixin, getNodes } = require('../../util/mixin');
-const id = 'd75f74d5-45d7-4c02-906e-bfd947a1f440';
+const { addMixin } = require('../../util/mixin');
 
 const relationshipGetterNames = [
 	'getChildren', 'getParents', 'getWorks', 'getAuthors', 'getPaths', 'getSteps', 'getTravelers'
@@ -9,10 +8,13 @@ const relationshipGetterNames = [
 const suppressRelationNodes = true; // Exclude all nodes which contain relationship information
 const expandRelationships = true; // Include related nodes as branches of main nodes (1 level deep)
 
-const Mixin = (d3) => {
-	const getMixinNodes = () => d3.state.nodes.filter((node) => node.mixin_id === id);
-	return mixin(d3, {
-		getData: function(_super, ...options) {
+const Relation = {
+	name: 'Relation',
+
+	uuid: 'd75f74d5-45d7-4c02-906e-bfd947a1f440',
+
+	d3: {
+		getData: function({ _super }, ...options) {
 				return _super(...options)
 					.map(
 						item => ( expandRelationships ? {
@@ -29,11 +31,11 @@ const Mixin = (d3) => {
 					.filter(item => !suppressRelationNodes || item.relationType_id === undefined);
 		},
 		
-		getRelationshipTypes: function(_super) {
+		getRelationshipTypes: function({ _super, getMixinNodes }) {
 			return getMixinNodes().map(rt => this.getRelationshipTypeById(rt.relationType_id));
 		},
 		
-		getRelationshipTypeById: function(_super, id) {
+		getRelationshipTypeById: function({ _super, getMixinNodes }, id) {
 			const rt = getMixinNodes().find(rt => rt.relationType_id === id);
 			return {
 				...rt,
@@ -51,7 +53,7 @@ const Mixin = (d3) => {
 			};
 		},
 		
-		link: function(_super, relationshipType, relatives) {
+		link: function({ _super }, relationshipType, relatives) {
 			console.group(`Relationship: Linking nodes ${relatives.map( rel => rel.text ).join(', ') } as ${relationshipType.text}`);
 			return this.createNode({
 				relationType_id: relationshipType.id,
@@ -64,7 +66,7 @@ const Mixin = (d3) => {
 			);
 		},
 	
-		hydrateData: function(_super, data) {
+		hydrateData: function({ _super }, data) {
 			const superData = _super(data);
 	
 			return {
@@ -105,7 +107,7 @@ const Mixin = (d3) => {
 			};
 		},
 	
-		createNode: function(_super, data) {
+		createNode: function({ _super }, data) {
 			const { rel, ...newData } = data;
 			return _super(newData).then(
 				(parentNode) => {
@@ -135,49 +137,52 @@ const Mixin = (d3) => {
 				}
 			);
 		},
-	});
+
+/*
+	Mixin: (d3) => {
+		const getMixinNodes = () => d3.state.nodes.filter((node) => node.mixin_id === id);
+		return withEngine(d3).extend({
+		});
+*/
+
+	},
+
+	nodes: [
+		{
+			relationType_id: 0,
+			text: 'Lineage',
+			constant: 'CHILD_OF',
+			titles: [
+				{s: 'child', p: 'children'},
+				{s: 'parent', p: 'parents'}
+			]
+		},
+		{
+			relationType_id: 1,
+			text: 'Authorship',
+			constant: 'WORK_OF',
+			titles: [
+				{s: 'work', p: 'works'},
+				{s: 'author', p: 'authors'}
+			]
+		},
+		{
+			relationType_id: 2,
+			text: 'Path\'s step',
+			titles: [
+				{s: 'path', p: 'paths'},
+				{s: 'step', p: 'steps'}
+			]
+		},
+		{
+			relationType_id: 3,
+			text: 'Traveler\'s Path',
+			titles: [
+				{s: 'path', p: 'paths'},
+				{s: 'traveler', p: 'travelers'}
+			]
+		},
+	]
 };
 
-const nodes = [
-	{
-		relationType_id: 0,
-		text: 'Lineage',
-		constant: 'CHILD_OF',
-		titles: [
-			{s: 'child', p: 'children'},
-			{s: 'parent', p: 'parents'}
-		]
-	},
-	{
-		relationType_id: 1,
-		text: 'Authorship',
-		constant: 'WORK_OF',
-		titles: [
-			{s: 'work', p: 'works'},
-			{s: 'author', p: 'authors'}
-		]
-	},
-	{
-		relationType_id: 2,
-		text: 'Path\'s step',
-		titles: [
-			{s: 'path', p: 'paths'},
-			{s: 'step', p: 'steps'}
-		]
-	},
-	{
-		relationType_id: 3,
-		text: 'Traveler\'s Path',
-		titles: [
-			{s: 'path', p: 'paths'},
-			{s: 'traveler', p: 'travelers'}
-		]
-	},
-];
-
-module.exports = {
-	Mixin,
-	name: 'Relation',
-	nodes,
-	id,
-};
+module.exports = addMixin(Relation);

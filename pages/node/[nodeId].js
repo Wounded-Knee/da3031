@@ -32,7 +32,7 @@ export default function NodeView({ d3 }) {
 								selectOnCreate
 								onSelect={ chosenNode => d3.navigate(node, chosenNode) }
 								createNode={
-									(text) => d3.createData({
+									(text) => d3.createNode({
 										text,
 										rel: {
 											[ RT_CHILD_OF ]: [ node ]
