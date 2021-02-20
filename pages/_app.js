@@ -25,7 +25,7 @@ class D3 extends React.Component {
 			}
 		};
 
-		mixins.forEach((mixin) => mixin.Mixin(this));
+		mixins.forEach((mixin) => mixin(this));
 
 		this.once('gotWindow', (window) => {
 			discordOauth2.setUrl(window.location.search); // Send oauth code to its handler
@@ -51,11 +51,13 @@ class D3 extends React.Component {
 	}
 
 	getQuery() {
-		return this.props.router.query;
+		const { router } = this.props;
+		return router.query;
 	}
 
 	navigateToNode({ id }) {
-		return this.router.push(`/node/${id}`);
+		const { router } = this.props;
+		return router.push(`/node/${id}`);
 	}
 
 	// Legacy Methods ---
@@ -117,7 +119,7 @@ class D3 extends React.Component {
 		this.setState((state, props) => ({
 			nodes: [
 				...state.nodes,
-				...nodes.filter((node) => !this.getDataById(node.id)),
+				...nodes.filter((node) => !this.getDataById(node.id, true)),
 			],
 		}));
 	}

@@ -153,7 +153,7 @@ main h1 a,
 header a.logo span {
   color: #0070f3;
   font-weight: bold;
-  background: url(/rainbowPixels.gif) no-repeat;
+  background: url(/rainbow.gif) no-repeat;
   background-size: cover;
   background-position: center;
   -webkit-background-clip: text;
@@ -167,7 +167,7 @@ header a.logo span {
 
 .state2 main h1 a,
 .state2 header a.logo span {
-  background-image: url(/rainbow.gif);
+  background-image: url(/rainbow-wow.gif);
 }
 
 .state3 main h1 a,
