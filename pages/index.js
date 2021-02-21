@@ -20,7 +20,7 @@ export default function Home(props) {
   );
 
   return (
-		<Layout { ...props }>
+		<Layout d3={ d3 } { ...props }>
 			<h1 className={styles.title}>
         <Link href={ discordOauth2.getOauth2Url() }>
           <a>D<sup>3</sup></a>

@@ -10,9 +10,13 @@ const {
 	theme,
 } = config;
 
-const Layout = ({ title, children }) => {
+const Layout = ({ d3, title, children }) => {
+	const classState = !d3.getStatus('wsConnected') || d3.getStatus('wsNetworkError')
+		? 'state5'
+		: 'state0';
+
 	return (
-		<div className={ [styles.container, 'state2', 'theme'+theme].join(' ') }>
+		<div className={ [styles.container, classState, 'theme'+theme].join(' ') }>
 			<Head>
 				<title>{ title || "Human Communication" } D³</title>
 				<link rel="shortcut icon" type="image/gif" href="/d3.gif" />

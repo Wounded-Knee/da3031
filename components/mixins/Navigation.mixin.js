@@ -15,12 +15,12 @@ const Navigation = {
 	d3: {
 		navigate: function({ _super }, origin, destination) {
 			console.log(`Navigation: ${origin ? origin.text : '*'} => ${destination.text}`);
-			if (!origin && this.getAvatar()) {
-				this.createData({
-					text: `${this.getAvatar().text}'s Untitled Path`,
+			if (!origin) {
+				this.createNode({
+					text: `User's Untitled Path`,
 					rel: {
-						[ RT_AUTHOR_OF ]: [ this.getAvatar() ],
-						[ RT_TRAVELER ]: [ this.getAvatar() ]
+						[ RT_AUTHOR_OF ]: [ 1 ],
+						[ RT_TRAVELER ]: [ 1 ]
 					}
 				}).then( (response) => {
 					this.navCurrentPath = response;

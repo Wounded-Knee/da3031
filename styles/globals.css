@@ -189,6 +189,11 @@ header a.logo span {
   background-image: url(/andthis.gif);
 }
 
+.state5 main h1 a,
+.state5 header a.logo span {
+  background-image: url(/drops.gif);
+}
+
 @import url(../node_modules/react-tabs/style/react-tabs.css);
 
 /* FOOTER

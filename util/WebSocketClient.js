@@ -61,6 +61,7 @@ const WebSocketClient = {
 	},
 	
 	_onClose: () => {
+		console.log('Fucking closed socket');
 		WebSocketClient.status = 1;
 		WebSocketClient.onClose();
 	},

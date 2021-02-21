@@ -14,7 +14,7 @@ export default function NodeView({ d3 }) {
 	const node = d3.getDataById(nodeId);
 
 	return (
-		<Layout title="Node View">
+		<Layout d3={ d3 } title="Node View">
 			{
 				!d3.isInitialized()
 					? <div className="loading">Loading...</div>
