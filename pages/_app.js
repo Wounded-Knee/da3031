@@ -3,7 +3,6 @@ import '../styles/globals.css';
 import '../styles/jsonview.css';
 import config from '../d3.config';
 import EventEmitter from 'events';
-import debounce from 'debounce';
 import dynamic from 'next/dynamic';
 import WebSocketClient from '../util/WebSocketClient';
 import discordOauth2 from '../classes/DiscordOauth2.class';
@@ -25,7 +24,9 @@ class D3 extends React.Component {
 			}
 		};
 
-		mixins.forEach((mixin) => mixin(this));
+		mixins.forEach((mixin) => {
+			console.log(`Mixin Init: ${mixin(this).name}`);
+		});
 
 		this.once('gotWindow', (window) => {
 			discordOauth2.setUrl(window.location.search); // Send oauth code to its handler
@@ -58,6 +59,10 @@ class D3 extends React.Component {
 	navigateToNode({ id }) {
 		const { router } = this.props;
 		return router.push(`/node/${id}`);
+	}
+	
+	getRendererByNode(node) {
+		return ({ node }) => <span className="text">{ node.text }</span>;
 	}
 
 	// Legacy Methods ---

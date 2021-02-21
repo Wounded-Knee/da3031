@@ -9,29 +9,24 @@ class D3 {
 	}
 	
 	inventoryMixins() {
-		console.log(`Mixins: ${ mixins.map((mixin) => mixin.name).join(', ') }`);
+		console.log(`Mixins: ${ mixins.map((mixin) => mixin().name).join(', ') }`);
 	}
 	
 	initializeMixins() {
 		return mixins.reduce((promiseChain, mixin) => {
-			const { nodes } = mixin;
+			const { nodes, uuid, name } = mixin();
 			return nodes.reduce((promiseChain, node) => {
 		    return promiseChain.then(chainResults =>
 	        webSocketServer
 	        	.addNode({
 	        		...node,
-	        		mixin_id: mixin.id,
+	        		mixin_id: uuid,
 	        	})
-	        	.then(() => { console.log(`Registered ${mixin.name}:${node.text}`)})
+	        	.then(() => {
+	        		console.log(`Registered ${name}:${node.text}`)
+	        	})
 			  );
-			}, Promise.resolve([])).then(arrayOfResults => {
-			  // Do something with all results
-			});
-	    return promiseChain.then(chainResults =>
-        mixin.then(currentResult =>
-          [ ...chainResults, currentResult ]
-        )
-		  );
+			}, Promise.resolve([]));
 		}, Promise.resolve([]));
 	}
 }

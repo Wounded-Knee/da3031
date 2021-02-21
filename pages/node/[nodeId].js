@@ -21,7 +21,7 @@ export default function NodeView({ d3 }) {
 					: <>
 						<ol className="nodes">
 							{ node
-								? <Node node={ node } />
+								? <Node node={ node } d3={ d3 } />
 								: <p>{ `Node #${nodeId} not found.` }</p>
 							}
 						</ol>

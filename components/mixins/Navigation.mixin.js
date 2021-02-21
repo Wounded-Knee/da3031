@@ -14,7 +14,7 @@ const Navigation = {
 	
 	d3: {
 		navigate: function({ _super }, origin, destination) {
-			console.log(`Navigation: ${origin.text} => ${destination.text}`);
+			console.log(`Navigation: ${origin ? origin.text : '*'} => ${destination.text}`);
 			if (!origin && this.getAvatar()) {
 				this.createData({
 					text: `${this.getAvatar().text}'s Untitled Path`,

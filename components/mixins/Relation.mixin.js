@@ -137,14 +137,6 @@ const Relation = {
 				}
 			);
 		},
-
-/*
-	Mixin: (d3) => {
-		const getMixinNodes = () => d3.state.nodes.filter((node) => node.mixin_id === id);
-		return withEngine(d3).extend({
-		});
-*/
-
 	},
 
 	nodes: [

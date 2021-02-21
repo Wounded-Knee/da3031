@@ -9,6 +9,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@szum.szym/upside-down": "^1.0.4",
     "d3": "^6.5.0",
     "discord-oauth2": "^2.6.0",
     "events": "^3.2.0",

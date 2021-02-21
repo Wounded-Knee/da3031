@@ -49,12 +49,16 @@ export default function Home(props) {
     			<div className={styles.grid}>
             {
               orphans.map(
-                (orphan) => <Link key={ orphan.id } href={ `/node/${orphan.id}` }>
-                    <a className={styles.card}>
-                      <h3>{ orphan.text }</h3>
-                      <p>Begin Communicating Here</p>
-                    </a>
-                  </Link>
+                (orphan) => {
+                  const RenderNode = d3.getRendererByNode(orphan);
+                  return (
+                    <Link key={ orphan.id } href={ `/node/${orphan.id}` }>
+                      <a className={styles.card}>
+                        <RenderNode node={ orphan } />
+                      </a>
+                    </Link>
+                  );
+                }
               )
             }
     			</div>

@@ -1,10 +1,12 @@
 const Relation = require('./components/mixins/Relation.mixin');
 const Navigation = require('./components/mixins/Navigation.mixin');
+const Bracketize = require('./components/mixins/Bracketize.mixin');
+const Gif = require('./components/mixins/Gif.mixin');
 
 const config = {
 	devMode: false,
 	theme: "Dark",
-	mixins: [Relation, Navigation],
+	mixins: [Relation, Navigation, Bracketize, Gif],
 	web: {
 		port: webPort = 8080,
 		address: address = 'd3.jpkramer.com',

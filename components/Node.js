@@ -6,17 +6,17 @@ export default function Node(props) {
 		node: undefined,
 		parentRecursionLimit: Infinity,
 		recursionCount: 0,
-		RenderNode: ({ node }) => <span className="text">{ node.text }</span>,
 		...props,
 	};
 	const {
+		d3,
 		node,
 		nodeType,
 		recursionCount,
 		parentRecursionLimit,
-		RenderNode,
 	} = config;
 	const nodeParent = node.getParents ? node.getParents()[0] : undefined;
+	const RenderNode = d3.getRendererByNode(node);
 
 	return (
 		<>
