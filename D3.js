@@ -1,11 +1,34 @@
 const config = require('./config');
 const webSocketServer = require('./webSocketServer');
+const dreamkeeper = require('./dreamkeeper');
 const { mixins } = config;
 
 class D3 {
 	constructor() {
 		this.inventoryMixins();
-		webSocketServer.onNewCache(this.initializeMixins.bind(this));
+		webSocketServer.onNewCache(() => {
+			return this
+				.initializeMixins()
+				//.then(() => this.lotsaNodes());
+		});
+	}
+	
+	// Stress-tests the system with 2680 data nodes
+	lotsaNodes() {
+		const lines = [
+			...dreamkeeper,
+			...dreamkeeper,
+			...dreamkeeper,
+			...dreamkeeper,
+		];
+		return lines.reduce((promiseChain, line) => {
+	    return promiseChain.then(chainResults =>
+        webSocketServer
+        	.addNode({
+        		text: line
+        	})
+		  );
+		}, Promise.resolve([]));
 	}
 	
 	inventoryMixins() {

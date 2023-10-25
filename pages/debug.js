@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Toggle from 'react-toggle';
 import styles from '../styles/Debug.module.css';
 import Layout from '../components/Layout';
 import { JsonView } from 'json-view-for-react';
@@ -39,6 +40,29 @@ export default function Debug({ d3 }) {
 			{ /*
 			<h2>Node Graph</h2>
 			<NodeGraph annuitCœptis={ annuitCœptis } />
+			
+			<h2>
+				Operations
+				<Toggle
+					id="safety"
+					className="safety"
+				  icons={{
+			      checked: null,
+			      unchecked: '⚠️',
+			    }}
+				  checked={ d3.state.enableSafety }
+				  onChange={ (e) => {
+				  	const { checked } = e.target;
+				  	if (!checked) {
+					  	setTimeout(() => {
+						  	console.log('Safety back on');
+					  		d3.setState({ enableSafety: true });
+					  	}, 10000);
+				  	}
+				  	d3.setState({ enableSafety: checked });
+				  }}
+				/>
+			</h2>
 			*/ }
 
 			<h2>Raw Data</h2>

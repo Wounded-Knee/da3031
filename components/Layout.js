@@ -33,6 +33,12 @@ const Layout = ({ d3, title, children }) => {
 						</a>
 					</Link>
 
+					<Link href="/duh">
+						<a title="Notifications">
+							⭐
+						</a>
+					</Link>
+
 					<Link href="/debug">
 						<a title="Debug Information">
 							🧪
@@ -52,7 +58,7 @@ const Layout = ({ d3, title, children }) => {
 			</main>
 
 			<footer className={styles.footer}>
-				&copy;2021 <a href="https://github.com/WAKlNYAN/">WAKlNYAN</a>
+				<a href="/debug">&copy;</a>2021 <a href="https://github.com/WAKlNYAN/">WAKlNYAN</a>
 			</footer>
 		</div>
 	);

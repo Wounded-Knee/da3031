@@ -1,6 +1,7 @@
 import React from 'react';
 import '../styles/globals.css';
 import '../styles/jsonview.css';
+import 'react-toggle/style.css';
 import config from '../d3.config';
 import EventEmitter from 'events';
 import dynamic from 'next/dynamic';
@@ -27,10 +28,8 @@ class D3 extends React.Component {
 		mixins.forEach((mixin) => {
 			console.log(`Mixin Init: ${mixin(this).name}`);
 		});
-
-		this.once('gotWindow', (window) => {
-			discordOauth2.setUrl(window.location.search); // Send oauth code to its handler
-		});
+		
+		discordOauth2.setUrl(props.router.asPath); // Send oauth code to its handler
 
 		WebSocketClient.onMessage = (nodes) => this.assimilateNodes(nodes);
 		WebSocketClient.onClose = () => this.setStatus('wsConnected', false);

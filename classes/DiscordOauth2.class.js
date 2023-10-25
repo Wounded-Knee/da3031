@@ -31,7 +31,6 @@ class Discord {
 
 	setUrl(url) {
 		if (url === '') return false;
-		console.log('DiscordOauth2: Got URL ', url);
 
 		const {
 			code,
@@ -48,7 +47,9 @@ class Discord {
 					b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
 			}
 			return b;
-		})(url.substr(1).split('&'));
+		})(url.substr(2).split('&'));
+
+		console.log('DiscordOauth2: Got stuff ', code, state);
 
 		if (code) this.setCode(code);
 	}
@@ -58,18 +59,16 @@ class Discord {
 		this.code = code;
 		console.log('DiscordOauth2: Got code ', code, this.instance);
 
-		try {
-			this.instance.tokenRequest({
-				// clientId, clientSecret and redirectUri are omitted, as they were already set on the class constructor
-				code,
-				grantType: "authorization_code",
-				scope: ["identify"],
-			}).then(
-				(data) => this.bearerToken = data
-			);
-		} catch(e) {
-			console.error(e);
-		}
+		this.instance.tokenRequest({
+			// clientId, clientSecret and redirectUri are omitted, as they were already set on the class constructor
+			code,
+			grantType: "authorization_code",
+			scope: ["identify"],
+		}).then(
+			(data) => this.bearerToken = data
+		).catch(
+			(err) => console.error(err)
+		);
 	}
 };
 
